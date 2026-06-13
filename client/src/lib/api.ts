@@ -29,6 +29,7 @@ export interface Product {
   unitOfMeasure: string;
   tax: number;
   description: string;
+  isActive?: boolean;
   category: Category | null;
 }
 
@@ -62,6 +63,7 @@ export interface Order {
   subtotal: number;
   taxAmount: number;
   discount: number;
+  couponCode?: string | null;
   status: 'DRAFT' | 'PAID' | 'CANCELLED';
   kitchenStatus: 'NONE' | 'PENDING' | 'PREPARING' | 'READY' | 'SERVED';
   table: { id: string; tableNumber: number } | null;
@@ -152,10 +154,91 @@ export async function createOrder(tableId: string, items: { productId: string; q
   });
 }
 
-export async function payOrder(orderId: string) {
+export async function payOrder(orderId: string, couponCode?: string) {
   return apiFetch<{ message: string; order: Order }>(`/orders/${orderId}/pay`, {
     method: 'PATCH',
+    body: JSON.stringify(couponCode ? { couponCode } : {}),
   });
+}
+
+export async function validateCoupon(code: string, subtotal: number, taxAmount: number) {
+  return apiFetch<{
+    code: string;
+    discountType: string;
+    discountValue: number;
+    discount: number;
+    total: number;
+  }>('/coupons/validate', {
+    method: 'POST',
+    body: JSON.stringify({ code, subtotal, taxAmount }),
+  });
+}
+
+export async function fetchSessionStats() {
+  return apiFetch<{
+    session: {
+      id: string;
+      sessionNumber: string;
+      openedAt: string;
+      status: string;
+      orderCount: number;
+      paidOrderCount: number;
+      totalSales: number;
+      lastClosingSale: number | null;
+    };
+  }>('/session/current');
+}
+
+export async function closeSession() {
+  return apiFetch<{
+    message: string;
+    summary: {
+      sessionNumber: string;
+      orderCount: number;
+      totalSales: number;
+      closedAt: string;
+    };
+  }>('/session/close', { method: 'POST' });
+}
+
+export async function fetchAllProducts() {
+  return apiFetch<{ products: Product[] }>('/products/all');
+}
+
+export async function createProduct(data: {
+  name: string;
+  categoryId: string;
+  price: number;
+  unitOfMeasure: string;
+  tax: number;
+  description?: string;
+}) {
+  return apiFetch<{ product: Product }>('/products', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateProduct(id: string, data: Partial<{
+  name: string;
+  categoryId: string;
+  price: number;
+  unitOfMeasure: string;
+  tax: number;
+  description: string;
+}>) {
+  return apiFetch<{ product: Product }>(`/products/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteProduct(id: string) {
+  return apiFetch<{ message: string }>(`/products/${id}`, { method: 'DELETE' });
+}
+
+export async function fetchCategories() {
+  return apiFetch<{ categories: Category[] }>('/products/categories');
 }
 
 export async function fetchKitchenQueue() {

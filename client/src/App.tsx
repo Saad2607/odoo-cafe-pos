@@ -5,6 +5,7 @@ import TerminalPage from './pages/TerminalPage';
 import FloorPlanPage from './pages/FloorPlanPage';
 import OrderPage from './pages/OrderPage';
 import KitchenPage from './pages/KitchenPage';
+import AdminProductsPage from './pages/AdminProductsPage';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/floor" element={<FloorPlanPage />} />
           <Route path="/order/:tableId" element={<OrderPage />} />
           <Route path="/kitchen" element={<KitchenPage />} />
+          <Route path="/admin/products" element={<AdminProductsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

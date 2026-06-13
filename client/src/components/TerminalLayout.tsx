@@ -29,6 +29,7 @@ export default function TerminalLayout({ children, title, subtitle }: TerminalLa
     { to: '/terminal', label: 'Home' },
     { to: '/floor', label: 'Floor Plan' },
     { to: '/kitchen', label: 'Kitchen' },
+    ...(user.role === 'ADMIN' ? [{ to: '/admin/products', label: 'Admin' }] : []),
   ];
 
   return (
@@ -38,7 +39,7 @@ export default function TerminalLayout({ children, title, subtitle }: TerminalLa
           <div className="terminal-brand-icon"><img src="/cafe.svg" alt="" width={28} height={28} /></div>
           <div>
             <h1>{title || 'POS Terminal'}</h1>
-            <span>{subtitle || 'Odoo Cafe — Phase 2'}</span>
+            <span>{subtitle || 'Odoo Cafe — Phase 3'}</span>
           </div>
         </div>
 

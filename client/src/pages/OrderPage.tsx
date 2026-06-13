@@ -6,6 +6,7 @@ import {
   fetchProducts,
   fetchTableOrder,
   payOrder,
+  validateCoupon,
   Product,
   Order,
 } from '../lib/api';
@@ -26,6 +27,8 @@ export default function OrderPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState<number | null>(null);
 
   useEffect(() => {
     if (!tableId) return;
@@ -101,13 +104,33 @@ export default function OrderPage() {
     }
   }
 
+  async function handleApplyCoupon() {
+    if (!existingOrder || !couponCode.trim()) return;
+    setError('');
+    try {
+      const res = await validateCoupon(
+        couponCode.trim(),
+        existingOrder.subtotal,
+        existingOrder.taxAmount,
+      );
+      setCouponDiscount(res.discount);
+      setMessage(`Coupon ${res.code} applied — ₹${res.discount.toFixed(2)} off`);
+    } catch (err) {
+      setCouponDiscount(null);
+      setError(err instanceof Error ? err.message : 'Invalid coupon');
+    }
+  }
+
   async function handlePay() {
     if (!existingOrder) return;
     setSubmitting(true);
     setError('');
 
     try {
-      const res = await payOrder(existingOrder.id);
+      const res = await payOrder(
+        existingOrder.id,
+        couponCode.trim() || undefined,
+      );
       setExistingOrder(res.order);
       setMessage('Payment complete — table is free.');
       setTimeout(() => navigate('/floor'), 1200);
@@ -147,7 +170,7 @@ export default function OrderPage() {
                           disabled={!!existingOrder}
                         >
                           <span className="product-name">{product.name}</span>
-                          <span className="product-price">${product.price.toFixed(2)}</span>
+                          <span className="product-price">₹{product.price.toFixed(2)}</span>
                           <span className="product-tax">{product.tax}% tax</span>
                         </button>
                       ))}
@@ -165,17 +188,35 @@ export default function OrderPage() {
                     {existingOrder.items.map((item) => (
                       <li key={item.productId}>
                         <span>{item.productName} × {item.quantity}</span>
-                        <span>${item.lineTotal.toFixed(2)}</span>
+                        <span>₹{item.lineTotal.toFixed(2)}</span>
                       </li>
                     ))}
                   </ul>
                   <div className="cart-total">
                     <span>Total</span>
-                    <strong>${existingOrder.amount.toFixed(2)}</strong>
+                    <strong>
+                      ₹{couponDiscount != null
+                        ? (existingOrder.subtotal + existingOrder.taxAmount - couponDiscount).toFixed(2)
+                        : existingOrder.amount.toFixed(2)}
+                    </strong>
                   </div>
+                  {couponDiscount != null && (
+                    <p className="pos-muted">Discount: −₹{couponDiscount.toFixed(2)}</p>
+                  )}
                   <p className="kitchen-pill">Kitchen: {existingOrder.kitchenStatus}</p>
                   {existingOrder.status === 'DRAFT' && (
-                    <button
+                    <>
+                      <div className="coupon-row">
+                        <input
+                          className="pill-input"
+                          placeholder="Coupon (e.g. WELCOME10)"
+                          value={couponCode}
+                          onChange={(e) => { setCouponCode(e.target.value); setCouponDiscount(null); }}
+                        />
+                        <button type="button" className="terminal-btn terminal-btn-secondary"
+                          onClick={handleApplyCoupon}>Apply</button>
+                      </div>
+                      <button
                       type="button"
                       className="terminal-btn terminal-btn-primary cart-submit"
                       onClick={handlePay}
@@ -183,6 +224,7 @@ export default function OrderPage() {
                     >
                       {submitting ? 'Processing…' : 'Pay & Close Table'}
                     </button>
+                    </>
                   )}
                   {existingOrder.status === 'PAID' && (
                     <p className="pos-success">Paid — table released</p>
@@ -202,7 +244,7 @@ export default function OrderPage() {
                             <button type="button" onClick={() => changeQty(line.product.id, 1)}>+</button>
                           </div>
                         </div>
-                        <span>${(line.product.price * line.quantity).toFixed(2)}</span>
+                        <span>₹{(line.product.price * line.quantity).toFixed(2)}</span>
                       </li>
                     ))}
                   </ul>
@@ -210,7 +252,7 @@ export default function OrderPage() {
                     <>
                       <div className="cart-total">
                         <span>Total</span>
-                        <strong>${total.toFixed(2)}</strong>
+                        <strong>₹{total.toFixed(2)}</strong>
                       </div>
                       <button
                         type="button"

@@ -18,6 +18,7 @@ export function formatOrder(order: {
   subtotal: number;
   taxAmount: number;
   discount: number;
+  couponCode?: string;
   status: string;
   kitchenStatus: string;
   tableId?: { _id?: unknown; tableNumber?: number } | unknown;
@@ -45,6 +46,7 @@ export function formatOrder(order: {
     subtotal: order.subtotal,
     taxAmount: order.taxAmount,
     discount: order.discount,
+    couponCode: order.couponCode ?? null,
     status: order.status,
     kitchenStatus: order.kitchenStatus,
     table,

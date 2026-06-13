@@ -22,6 +22,7 @@ export interface IOrder extends Document {
   subtotal: number;
   taxAmount: number;
   discount: number;
+  couponCode?: string;
   status: OrderStatus;
   kitchenStatus: KitchenStatus;
   tableId?: Types.ObjectId;
@@ -53,6 +54,7 @@ const orderSchema = new Schema<IOrder>(
     subtotal: { type: Number, default: 0 },
     taxAmount: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },
+    couponCode: { type: String },
     status: { type: String, enum: ['DRAFT', 'PAID', 'CANCELLED'], default: 'DRAFT' },
     kitchenStatus: {
       type: String,

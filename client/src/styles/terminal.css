@@ -60,7 +60,7 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.15);
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -265,4 +265,53 @@ a.terminal-btn-secondary {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: #faf8f5;
+  border-radius: 16px;
+  padding: 1rem;
+  border: 1px solid #e8e0d8;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6B4E71;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #8a8494;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.terminal-btn-close {
+  margin-top: 1rem;
+  background: transparent;
+  color: #c62828;
+  border: 2px solid #ffcdd2;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.terminal-btn-close:hover:not(:disabled) {
+  background: #ffebee;
+}
+
+.terminal-btn-close:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
