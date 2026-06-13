@@ -1,0 +1,23 @@
+# Secrets — never commit
+.env
+server/.env
+client/.env
+
+# Dependencies
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Build output
+dist/
+build/
+server/dist/
+client/dist/
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
+
+# Vite cache
+client/.vite/

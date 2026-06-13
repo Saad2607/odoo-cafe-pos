@@ -1,0 +1,268 @@
+.terminal-page {
+  min-height: 100vh;
+  background: #f5f2ed;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-header {
+  background: linear-gradient(135deg, #3D405B 0%, #5c5f7a 100%);
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 12px rgba(61, 64, 91, 0.2);
+}
+
+.terminal-nav {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.terminal-nav-link {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.terminal-nav-link:hover,
+.terminal-nav-link.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.terminal-main {
+  flex: 1;
+}
+
+.terminal-hub {
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.terminal-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.terminal-brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.terminal-brand h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.terminal-brand span {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.terminal-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.terminal-user-info {
+  text-align: right;
+}
+
+.terminal-user-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.terminal-user-role {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.terminal-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E07A5F, #F2CC8F);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #3D405B;
+}
+
+.terminal-logout {
+  padding: 0.5rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  background: transparent;
+  color: white;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.terminal-logout:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.terminal-body {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.terminal-welcome {
+  background: white;
+  border-radius: 24px;
+  padding: 3rem;
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(61, 64, 91, 0.06);
+}
+
+.terminal-welcome-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.terminal-welcome h2 {
+  font-size: 1.75rem;
+  color: #3D405B;
+  margin-bottom: 0.5rem;
+}
+
+.terminal-welcome p {
+  color: #8a8494;
+  margin-bottom: 2rem;
+}
+
+.session-card {
+  background: #faf8f5;
+  border-radius: 20px;
+  padding: 1.5rem 2rem;
+  text-align: left;
+  border: 1px solid #e8e0d8;
+}
+
+.session-card h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6B4E71;
+  margin-bottom: 1rem;
+}
+
+.session-detail {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
+  color: #3D405B;
+}
+
+.session-detail span:first-child {
+  color: #8a8494;
+}
+
+.session-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.session-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4caf50;
+}
+
+.terminal-actions {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.terminal-btn {
+  padding: 0.875rem 2rem;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.terminal-btn-primary,
+a.terminal-btn-primary {
+  background: linear-gradient(135deg, #6B4E71, #8B6B91);
+  color: white;
+  box-shadow: 0 4px 16px rgba(107, 78, 113, 0.25);
+  text-decoration: none;
+}
+
+.terminal-btn-primary:hover {
+  transform: translateY(-1px);
+}
+
+.terminal-btn-secondary,
+a.terminal-btn-secondary {
+  background: white;
+  color: #6B4E71;
+  border: 2px solid #e8e0d8;
+  text-decoration: none;
+}
+
+.terminal-btn-secondary:hover {
+  border-color: #6B4E71;
+}
+
+.checkpoint-badge {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: #2e7d32;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}

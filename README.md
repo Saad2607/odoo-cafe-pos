@@ -1,0 +1,2 @@
+# odoo-cafe-pos
+

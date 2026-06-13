@@ -1,0 +1,9 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  color: #3D405B;
+  background: #faf7f2;
+}
+#root { min-height: 100vh; }
+a { color: inherit; }
+button, input { font-family: inherit; }
