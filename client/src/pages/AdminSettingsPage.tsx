@@ -5,6 +5,7 @@ import {
   deleteCategory,
   fetchAllCategories,
   fetchPaymentSettings,
+  updateCategory,
   updatePaymentSettings,
   Category,
   PaymentSettings,
@@ -15,6 +16,7 @@ export default function AdminSettingsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [settings, setSettings] = useState<PaymentSettings | null>(null);
   const [catForm, setCatForm] = useState({ name: '', color: '#9E4B3A' });
+  const [editingCat, setEditingCat] = useState<Category | null>(null);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
@@ -34,6 +36,18 @@ export default function AdminSettingsPage() {
       setCategories((prev) => [...prev, res.category]);
       setCatForm({ name: '', color: '#9E4B3A' });
       setMessage('Category added');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed');
+    }
+  }
+
+  async function handleSaveCategoryEdit() {
+    if (!editingCat) return;
+    try {
+      const res = await updateCategory(editingCat.id, { name: editingCat.name, color: editingCat.color });
+      setCategories((prev) => prev.map((c) => c.id === res.category.id ? res.category : c));
+      setEditingCat(null);
+      setMessage('Category updated');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed');
     }
@@ -108,8 +122,22 @@ export default function AdminSettingsPage() {
             {categories.map((c) => (
               <li key={c.id}>
                 <span className="cat-swatch" style={{ background: c.color }} />
-                {c.name}
-                <button type="button" className="terminal-btn cafe-btn-danger" onClick={() => handleDeleteCategory(c.id)}>Delete</button>
+                {editingCat?.id === c.id ? (
+                  <>
+                    <input className="pill-input" value={editingCat.name}
+                      onChange={(e) => setEditingCat({ ...editingCat, name: e.target.value })} />
+                    <input type="color" value={editingCat.color}
+                      onChange={(e) => setEditingCat({ ...editingCat, color: e.target.value })} />
+                    <button type="button" className="terminal-btn cafe-btn-primary" onClick={handleSaveCategoryEdit}>Save</button>
+                    <button type="button" className="terminal-btn cafe-btn-outline" onClick={() => setEditingCat(null)}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    {c.name}
+                    <button type="button" className="terminal-btn cafe-btn-outline" onClick={() => setEditingCat(c)}>Edit</button>
+                    <button type="button" className="terminal-btn cafe-btn-danger" onClick={() => handleDeleteCategory(c.id)}>Delete</button>
+                  </>
+                )}
               </li>
             ))}
           </ul>

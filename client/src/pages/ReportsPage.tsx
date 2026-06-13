@@ -17,22 +17,29 @@ export default function ReportsPage() {
   const [period, setPeriod] = useState('today');
   const [employeeId, setEmployeeId] = useState('');
   const [sessionId, setSessionId] = useState('');
+  const [productId, setProductId] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [useCustomRange, setUseCustomRange] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   function load() {
     setLoading(true);
     fetchReports({
-      period,
+      period: useCustomRange ? 'all' : period,
       employeeId: employeeId || undefined,
       sessionId: sessionId || undefined,
+      productId: productId || undefined,
+      fromDate: useCustomRange && fromDate ? fromDate : undefined,
+      toDate: useCustomRange && toDate ? toDate : undefined,
     })
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load reports'))
       .finally(() => setLoading(false));
   }
 
-  useEffect(() => { load(); }, [period, employeeId, sessionId]);
+  useEffect(() => { load(); }, [period, employeeId, sessionId, productId, fromDate, toDate, useCustomRange]);
 
   if (!user || user.role !== 'ADMIN') return <Navigate to="/dashboard" replace />;
 
@@ -60,6 +67,26 @@ export default function ReportsPage() {
     URL.revokeObjectURL(url);
   }
 
+  function exportXls() {
+    if (!data) return;
+    const tsv = [
+      ['Metric', 'Value'].join('\t'),
+      ['Total Orders', data.metrics.totalOrders].join('\t'),
+      ['Revenue', data.metrics.revenue].join('\t'),
+      ['Avg Order', data.metrics.avgOrderValue].join('\t'),
+      '',
+      ['Product', 'Qty', 'Revenue'].join('\t'),
+      ...data.topProducts.map((p) => [p.name, p.qty, p.revenue].join('\t')),
+    ].join('\n');
+    const blob = new Blob([tsv], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `brivio-report.xls`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function exportPdf() {
     window.print();
   }
@@ -70,9 +97,20 @@ export default function ReportsPage() {
     <AppLayout title="Reports" subtitle="Sales analytics">
       <div className="reports-page">
         <div className="reports-toolbar no-print">
-          <select className="pill-input" value={period} onChange={(e) => setPeriod(e.target.value)}>
-            {PERIODS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
-          </select>
+          <label className="reports-check">
+            <input type="checkbox" checked={useCustomRange} onChange={(e) => setUseCustomRange(e.target.checked)} />
+            Custom range
+          </label>
+          {useCustomRange ? (
+            <>
+              <input type="date" className="pill-input" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+              <input type="date" className="pill-input" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+            </>
+          ) : (
+            <select className="pill-input" value={period} onChange={(e) => setPeriod(e.target.value)}>
+              {PERIODS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+            </select>
+          )}
           <select className="pill-input" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
             <option value="">All employees</option>
             {data?.filters.employees.map((e) => (
@@ -85,7 +123,14 @@ export default function ReportsPage() {
               <option key={s.id} value={s.id}>{s.sessionNumber}</option>
             ))}
           </select>
+          <select className="pill-input" value={productId} onChange={(e) => setProductId(e.target.value)}>
+            <option value="">All products</option>
+            {data?.filters.products.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
           <button type="button" className="terminal-btn cafe-btn-outline" onClick={exportCsv}>Export CSV</button>
+          <button type="button" className="terminal-btn cafe-btn-outline" onClick={exportXls}>Export XLS</button>
           <button type="button" className="terminal-btn cafe-btn-primary" onClick={exportPdf}>Print / PDF</button>
         </div>
 
@@ -140,6 +185,19 @@ export default function ReportsPage() {
 
               <section className="reports-section">
                 <h3>Top Categories</h3>
+                <div className="reports-chart">
+                  {data.topCategories.map((c) => (
+                    <div key={c.name} className="reports-bar-row">
+                      <span className="reports-bar-label">{c.name.slice(0, 8)}</span>
+                      <div className="reports-bar-track">
+                        <div className="reports-bar-fill" style={{
+                          width: `${(c.revenue / Math.max(...data.topCategories.map((x) => x.revenue), 1)) * 100}%`,
+                        }} />
+                      </div>
+                      <span className="reports-bar-value">₹{c.revenue}</span>
+                    </div>
+                  ))}
+                </div>
                 <table className="reports-table">
                   <thead><tr><th>Category</th><th>Revenue</th></tr></thead>
                   <tbody>

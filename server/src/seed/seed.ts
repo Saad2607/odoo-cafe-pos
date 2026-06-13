@@ -64,6 +64,7 @@ export async function seedDatabase() {
         description: item.desc,
         imageUrl: item.image,
         isActive: true,
+        sendToKitchen: true,
       },
       { upsert: true, new: true },
     );

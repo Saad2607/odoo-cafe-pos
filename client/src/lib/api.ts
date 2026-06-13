@@ -30,6 +30,7 @@ export interface Product {
   tax: number;
   description: string;
   imageUrl?: string | null;
+  sendToKitchen?: boolean;
   isActive?: boolean;
   category: Category | null;
 }
@@ -103,6 +104,31 @@ export interface PaymentSettings {
   cardEnabled: boolean;
   upiEnabled: boolean;
   upiId: string;
+}
+
+export interface Booking {
+  id: string;
+  customerName: string;
+  email: string | null;
+  phone: string | null;
+  bookingDate: string;
+  bookingTime: string;
+  partySize: number;
+  status: 'PENDING' | 'CONFIRMED' | 'SEATED' | 'CANCELLED';
+  notes: string | null;
+  table: { id: string; tableNumber: number } | null;
+}
+
+const TABLE_KEY = 'pos_current_table';
+
+export function setCurrentTable(tableNumber: number | null) {
+  if (tableNumber == null) sessionStorage.removeItem(TABLE_KEY);
+  else sessionStorage.setItem(TABLE_KEY, String(tableNumber));
+}
+
+export function getCurrentTable(): number | null {
+  const v = sessionStorage.getItem(TABLE_KEY);
+  return v ? Number(v) : null;
 }
 
 export interface AuthResponse {
@@ -314,6 +340,7 @@ export async function createProduct(data: {
   unitOfMeasure: string;
   tax: number;
   description?: string;
+  sendToKitchen?: boolean;
 }) {
   return apiFetch<{ product: Product }>('/products', {
     method: 'POST',
@@ -441,6 +468,7 @@ export interface ReportData {
   filters: {
     employees: Array<{ id: string; name: string }>;
     sessions: Array<{ id: string; sessionNumber: string; openedAt: string }>;
+    products: Array<{ id: string; name: string }>;
   };
 }
 
@@ -448,11 +476,17 @@ export async function fetchReports(params?: {
   period?: string;
   employeeId?: string;
   sessionId?: string;
+  productId?: string;
+  fromDate?: string;
+  toDate?: string;
 }) {
   const q = new URLSearchParams();
   if (params?.period) q.set('period', params.period);
   if (params?.employeeId) q.set('employeeId', params.employeeId);
   if (params?.sessionId) q.set('sessionId', params.sessionId);
+  if (params?.productId) q.set('productId', params.productId);
+  if (params?.fromDate) q.set('fromDate', params.fromDate);
+  if (params?.toDate) q.set('toDate', params.toDate);
   const query = q.toString() ? `?${q}` : '';
   return apiFetch<ReportData>(`/reports${query}`);
 }
@@ -468,8 +502,12 @@ export async function toggleKitchenItem(orderId: string, itemId: string) {
   return apiFetch<{ order: Order }>(`/kitchen/${orderId}/items/${itemId}/done`, { method: 'PATCH' });
 }
 
-export async function fetchKitchenQueue(q?: string) {
-  const query = q ? `?q=${encodeURIComponent(q)}` : '';
+export async function fetchKitchenQueue(params?: { q?: string; categoryId?: string; productId?: string }) {
+  const q = new URLSearchParams();
+  if (params?.q) q.set('q', params.q);
+  if (params?.categoryId) q.set('categoryId', params.categoryId);
+  if (params?.productId) q.set('productId', params.productId);
+  const query = q.toString() ? `?${q}` : '';
   return apiFetch<{ orders: Order[] }>(`/kitchen${query}`);
 }
 
@@ -480,8 +518,11 @@ export async function updateKitchenStatus(orderId: string, kitchenStatus: Order[
   });
 }
 
-export async function fetchSessionOrders(q?: string) {
-  const query = q ? `?q=${encodeURIComponent(q)}` : '';
+export async function fetchSessionOrders(params?: { q?: string; date?: string }) {
+  const q = new URLSearchParams();
+  if (params?.q) q.set('q', params.q);
+  if (params?.date) q.set('date', params.date);
+  const query = q.toString() ? `?${q}` : '';
   return apiFetch<{ orders: Order[] }>(`/orders/session${query}`);
 }
 
@@ -546,4 +587,60 @@ export async function updateCategory(id: string, data: Partial<{ name: string; c
 
 export async function deleteCategory(id: string) {
   return apiFetch<{ message: string }>(`/categories/${id}`, { method: 'DELETE' });
+}
+
+export async function deleteCustomer(id: string) {
+  return apiFetch<{ message: string }>(`/customers/${id}`, { method: 'DELETE' });
+}
+
+export async function sendReceiptEmail(orderId: string, email: string) {
+  return apiFetch<{ message: string; sent: boolean }>(`/orders/${orderId}/send-receipt`, {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function fetchBookings(params?: { date?: string; status?: string }) {
+  const q = new URLSearchParams();
+  if (params?.date) q.set('date', params.date);
+  if (params?.status) q.set('status', params.status);
+  const query = q.toString() ? `?${q}` : '';
+  return apiFetch<{ bookings: Booking[] }>(`/bookings${query}`);
+}
+
+export async function createBooking(data: {
+  customerName: string;
+  email?: string;
+  phone?: string;
+  bookingDate: string;
+  bookingTime: string;
+  partySize: number;
+  tableId?: string;
+  notes?: string;
+}) {
+  return apiFetch<{ booking: Booking }>('/bookings', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateBooking(id: string, data: Partial<{
+  customerName: string;
+  email: string;
+  phone: string;
+  bookingDate: string;
+  bookingTime: string;
+  partySize: number;
+  tableId: string;
+  status: Booking['status'];
+  notes: string;
+}>) {
+  return apiFetch<{ booking: Booking }>(`/bookings/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteBooking(id: string) {
+  return apiFetch<{ message: string }>(`/bookings/${id}`, { method: 'DELETE' });
 }

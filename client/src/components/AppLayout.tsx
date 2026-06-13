@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { clearAuth, fetchProducts, getStoredUser, Product } from '../lib/api';
+import { clearAuth, fetchProducts, getCurrentTable, getStoredUser, Product } from '../lib/api';
 import { markFloorPopupForSession } from './FloorPopup';
 import '../styles/app-layout.css';
 
@@ -18,7 +18,15 @@ export default function AppLayout({ children, subtitle }: AppLayoutProps) {
   const [searchQ, setSearchQ] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [currentTable, setCurrentTableState] = useState<number | null>(getCurrentTable());
   const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onStorage = () => setCurrentTableState(getCurrentTable());
+    window.addEventListener('storage', onStorage);
+    const timer = setInterval(() => setCurrentTableState(getCurrentTable()), 1000);
+    return () => { window.removeEventListener('storage', onStorage); clearInterval(timer); };
+  }, [location.pathname]);
 
   useEffect(() => {
     if (searchQ.trim().length < 2) {
@@ -70,7 +78,8 @@ export default function AppLayout({ children, subtitle }: AppLayoutProps) {
     { to: '/floor', label: 'Table View' },
     { to: '/orders', label: 'Orders' },
     { to: '/customers', label: 'Customers' },
-    { to: '/kitchen', label: 'Kitchen' },
+    { to: '/kitchen', label: 'KDS' },
+    { to: '/bookings', label: 'Bookings' },
     ...(user.role === 'ADMIN'
       ? [
           { to: '/admin/products', label: 'Menu Admin' },
@@ -112,6 +121,9 @@ export default function AppLayout({ children, subtitle }: AppLayoutProps) {
         </div>
 
         <div className="app-search-wrap" ref={searchRef}>
+          {currentTable != null && (
+            <span className="app-table-indicator">Table {currentTable}</span>
+          )}
           <input
             className="app-search-input"
             placeholder="Search menu items…"

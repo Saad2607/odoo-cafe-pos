@@ -16,6 +16,7 @@ import categoryRoutes from './routes/categories.js';
 import userRoutes from './routes/users.js';
 import discountRoutes from './routes/discounts.js';
 import reportRoutes from './routes/reports.js';
+import bookingRoutes from './routes/bookings.js';
 
 const app = express();
 
@@ -26,7 +27,7 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     stack: 'MERN',
-    phase: 'Phase 5 - Users, Reports, Discounts & Kitchen Items',
+    phase: 'Phase 6 - Booking, KDS filters, Receipt & Reports',
     database: 'MongoDB',
     backend: 'Express + Node.js',
     frontend: 'React (port 5173)',
@@ -46,5 +47,6 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/discounts', discountRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 export default app;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
-import { fetchSessionStats, getStoredUser } from '../lib/api';
+import { closeSession, fetchSessionStats, getStoredSession, getStoredUser } from '../lib/api';
 import '../styles/dashboard.css';
 
 const QUICK_ACTIONS = [
@@ -28,7 +28,18 @@ const MENU_HIGHLIGHTS = [
 
 export default function DashboardPage() {
   const user = getStoredUser();
-  const [stats, setStats] = useState({ paidOrderCount: 0, totalSales: 0, orderCount: 0 });
+  const navigate = useNavigate();
+  const session = getStoredSession();
+  const [stats, setStats] = useState({
+    paidOrderCount: 0,
+    totalSales: 0,
+    orderCount: 0,
+    openedAt: '',
+    lastClosingSale: 0,
+  });
+  const [closing, setClosing] = useState(false);
+  const [closeMsg, setCloseMsg] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchSessionStats()
@@ -37,10 +48,27 @@ export default function DashboardPage() {
           paidOrderCount: res.session.paidOrderCount ?? 0,
           totalSales: res.session.totalSales ?? 0,
           orderCount: res.session.orderCount ?? 0,
+          openedAt: res.session.openedAt,
+          lastClosingSale: res.session.lastClosingSale ?? 0,
         });
       })
       .catch(() => undefined);
   }, []);
+
+  async function handleCloseSession() {
+    if (!confirm('Close this POS session? All draft orders must be paid or cancelled first.')) return;
+    setClosing(true);
+    setError('');
+    try {
+      const res = await closeSession();
+      setCloseMsg(`Session closed — ${res.summary.orderCount} orders, ₹${res.summary.totalSales.toFixed(0)} revenue.`);
+      setTimeout(() => navigate('/login', { replace: true }), 2500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to close session');
+    } finally {
+      setClosing(false);
+    }
+  }
 
   const avgOrder = stats.paidOrderCount > 0
     ? Math.round(stats.totalSales / stats.paidOrderCount)
@@ -89,6 +117,25 @@ export default function DashboardPage() {
               <span>Avg. Order</span>
             </div>
           </article>
+        </section>
+
+        <section className="dash-session-section">
+          <h2>POS Session</h2>
+          <div className="dash-session-card">
+            <p><strong>Session:</strong> {session?.sessionNumber ?? '—'}</p>
+            <p><strong>Opened:</strong> {stats.openedAt ? new Date(stats.openedAt).toLocaleString() : '—'}</p>
+            <p><strong>Last closing sale:</strong> {stats.lastClosingSale > 0 ? `₹${stats.lastClosingSale}` : '—'}</p>
+            {error && <div className="pos-error">{error}</div>}
+            {closeMsg && <div className="pos-success">{closeMsg}</div>}
+            <button
+              type="button"
+              className="terminal-btn cafe-btn-danger dash-close-btn"
+              onClick={handleCloseSession}
+              disabled={closing}
+            >
+              {closing ? 'Closing…' : 'Close Session & End Shift'}
+            </button>
+          </div>
         </section>
 
         <section className="dash-actions-section">

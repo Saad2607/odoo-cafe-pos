@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Floor } from '../lib/api';
+import { Floor, setCurrentTable } from '../lib/api';
 import '../styles/floor-plan.css';
 
 const FLOOR_POPUP_KEY = 'odoo_show_floor_popup';
@@ -24,8 +24,9 @@ interface FloorPopupProps {
 export default function FloorPopup({ floors, onClose }: FloorPopupProps) {
   const navigate = useNavigate();
 
-  function selectTable(tableId: string) {
+  function selectTable(tableId: string, tableNumber: number) {
     clearFloorPopupFlag();
+    setCurrentTable(tableNumber);
     navigate(`/order/${tableId}`);
   }
 
@@ -55,7 +56,7 @@ export default function FloorPopup({ floors, onClose }: FloorPopupProps) {
                     key={table.id}
                     type="button"
                     className={`floor-table-btn${table.status === 'OCCUPIED' ? ' occupied' : ''}`}
-                    onClick={() => selectTable(table.id)}
+                    onClick={() => selectTable(table.id, table.tableNumber)}
                   >
                     <span className="num">{table.tableNumber}</span>
                     <span className="seats">{table.seats} seats</span>

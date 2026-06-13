@@ -9,3 +9,4 @@ export { Coupon, type ICoupon } from './Coupon.js';
 export { Promotion, type IPromotion } from './Promotion.js';
 export { PosSession, type IPosSession } from './PosSession.js';
 export { Order, type IOrder } from './Order.js';
+export { Booking, type IBooking } from './Booking.js';

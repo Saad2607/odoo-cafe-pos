@@ -28,12 +28,29 @@ router.get('/', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res
     const period = (req.query.period as string) || 'today';
     const employeeId = req.query.employeeId as string | undefined;
     const sessionId = req.query.sessionId as string | undefined;
+    const productId = req.query.productId as string | undefined;
+    const fromDate = req.query.fromDate as string | undefined;
+    const toDate = req.query.toDate as string | undefined;
 
     const filter: Record<string, unknown> = { status: 'PAID' };
-    const start = periodStart(period);
-    if (start) filter.date = { $gte: start };
+
+    if (fromDate || toDate) {
+      const range: Record<string, Date> = {};
+      if (fromDate) range.$gte = new Date(fromDate);
+      if (toDate) {
+        const end = new Date(toDate);
+        end.setDate(end.getDate() + 1);
+        range.$lt = end;
+      }
+      filter.date = range;
+    } else {
+      const start = periodStart(period);
+      if (start) filter.date = { $gte: start };
+    }
+
     if (employeeId) filter.employeeId = employeeId;
     if (sessionId) filter.sessionId = sessionId;
+    if (productId) filter['items.productId'] = productId;
 
     const orders = await Order.find(filter).sort({ date: -1 });
 
@@ -90,9 +107,10 @@ router.get('/', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res
         amount: o.amount,
       }));
 
-    const [employees, sessions] = await Promise.all([
+    const [employees, sessions, allProducts] = await Promise.all([
       User.find({ role: 'EMPLOYEE' }).select('name email'),
       PosSession.find().sort({ openedAt: -1 }).limit(20),
+      Product.find({ isActive: true }).select('name'),
     ]);
 
     return res.json({
@@ -112,6 +130,7 @@ router.get('/', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res
           sessionNumber: s.sessionNumber,
           openedAt: s.openedAt,
         })),
+        products: allProducts.map((p) => ({ id: String(p._id), name: p.name })),
       },
     });
   } catch {

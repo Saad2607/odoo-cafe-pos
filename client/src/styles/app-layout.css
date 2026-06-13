@@ -149,8 +149,11 @@
 .app-search-wrap {
   position: relative;
   flex: 1;
-  max-width: 280px;
+  max-width: 360px;
   min-width: 160px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .app-search-input {
@@ -200,6 +203,17 @@
 .app-search-results span {
   font-size: 0.75rem;
   color: #7A7268;
+}
+
+.app-table-indicator {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9E4B3A;
+  background: #F5F0E8;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .app-nav-desktop {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AppLayout from '../components/AppLayout';
-import { createCustomer, fetchCustomers, updateCustomer, Customer } from '../lib/api';
+import { createCustomer, deleteCustomer, fetchCustomers, updateCustomer, Customer } from '../lib/api';
 import '../styles/customers.css';
 
 export default function CustomersPage() {
@@ -58,6 +58,17 @@ export default function CustomersPage() {
     }
   }
 
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this customer?')) return;
+    try {
+      await deleteCustomer(id);
+      setMessage('Customer deleted');
+      load(search.trim() || undefined);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed');
+    }
+  }
+
   return (
     <AppLayout title="Customers" subtitle="Search & manage">
       <div className="customers-page">
@@ -88,6 +99,9 @@ export default function CustomersPage() {
               {c.phone && <p>{c.phone}</p>}
               <button type="button" className="terminal-btn cafe-btn-outline" onClick={() => openEdit(c)}>
                 Edit
+              </button>
+              <button type="button" className="terminal-btn cafe-btn-danger" onClick={() => handleDelete(c.id)}>
+                Delete
               </button>
             </article>
           ))}

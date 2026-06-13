@@ -165,7 +165,14 @@ export default function PaymentModal({
           <div className="payment-upi">
             <p>Scan & pay to:</p>
             <strong>{settings.upiId}</strong>
-            <div className="payment-qr">UPI QR</div>
+            <img
+              className="payment-qr-img"
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                `upi://pay?pa=${settings.upiId}&pn=Brivio&am=${displayAmount}&cu=INR`,
+              )}`}
+              alt="UPI QR Code"
+            />
+            <p className="pos-muted">Amount: ₹{displayAmount}</p>
             <p className="pos-muted">Confirm payment after customer pays</p>
           </div>
         )}

@@ -13,13 +13,17 @@ const STATUS_LABELS: Record<Order['status'], string> = {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [search, setSearch] = useState('');
+  const [filterDate, setFilterDate] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  function loadOrders(q?: string) {
+  function loadOrders() {
     setLoading(true);
-    fetchSessionOrders(q)
+    fetchSessionOrders({
+      q: search.trim() || undefined,
+      date: filterDate || undefined,
+    })
       .then((res) => setOrders(res.orders))
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load orders'))
       .finally(() => setLoading(false));
@@ -31,7 +35,7 @@ export default function OrdersPage() {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    loadOrders(search.trim() || undefined);
+    loadOrders();
   }
 
   async function handleCancel(orderId: string) {
@@ -39,7 +43,7 @@ export default function OrdersPage() {
     try {
       await cancelOrder(orderId);
       setMessage('Order cancelled');
-      loadOrders(search.trim() || undefined);
+      loadOrders();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to cancel');
     }
@@ -51,9 +55,15 @@ export default function OrdersPage() {
         <form className="orders-search" onSubmit={handleSearch}>
           <input
             className="pill-input"
-            placeholder="Search by order # or product…"
+            placeholder="Search by order #, product, or customer…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+          />
+          <input
+            className="pill-input"
+            type="date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
           />
           <button type="submit" className="terminal-btn cafe-btn-outline">Search</button>
         </form>

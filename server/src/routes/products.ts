@@ -14,6 +14,7 @@ function mapProduct(p: {
   tax: number;
   description?: string;
   imageUrl?: string;
+  sendToKitchen?: boolean;
   isActive: boolean;
   categoryId: { _id?: unknown; name?: string; color?: string } | unknown;
 }) {
@@ -25,6 +26,7 @@ function mapProduct(p: {
     tax: p.tax,
     description: p.description ?? '',
     imageUrl: p.imageUrl ?? null,
+    sendToKitchen: p.sendToKitchen ?? true,
     isActive: p.isActive,
     category: p.categoryId && typeof p.categoryId === 'object'
       ? {
@@ -44,6 +46,7 @@ const productSchema = z.object({
   tax: z.number().min(0).default(0),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
+  sendToKitchen: z.boolean().optional(),
 });
 
 router.get('/categories', authenticate, async (_req, res) => {

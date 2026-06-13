@@ -8,6 +8,8 @@ import FoodCard from '../components/FoodCard';
 
 import PaymentModal from '../components/PaymentModal';
 import ReceiptPrint from '../components/ReceiptPrint';
+import DiscountModal from '../components/DiscountModal';
+import ReceiptEmailModal from '../components/ReceiptEmailModal';
 
 import { getFoodImage } from '../lib/foodImages';
 
@@ -18,6 +20,8 @@ import {
   createCustomer,
 
   createOrder,
+  updateDraftOrder,
+  setCurrentTable,
 
   fetchCustomers,
 
@@ -85,6 +89,8 @@ export default function OrderPage() {
 
   const [showPayment, setShowPayment] = useState(false);
   const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
+  const [showDiscount, setShowDiscount] = useState(false);
+  const [showReceiptEmail, setShowReceiptEmail] = useState(false);
 
   const [customerSearch, setCustomerSearch] = useState('');
 
@@ -112,6 +118,19 @@ export default function OrderPage() {
 
           setSelectedCustomer(orderRes.order.customer);
 
+        }
+
+        if (orderRes.order?.table) {
+          setCurrentTable(orderRes.order.table.tableNumber);
+        }
+
+        if (orderRes.order?.status === 'DRAFT') {
+          const lines: CartLine[] = [];
+          for (const item of orderRes.order.items) {
+            const product = productRes.products.find((p) => p.id === item.productId);
+            if (product) lines.push({ product, quantity: item.quantity });
+          }
+          if (lines.length) setCart(lines);
         }
 
       })
@@ -210,29 +229,31 @@ export default function OrderPage() {
 
     try {
 
-      const res = await createOrder(
-
-        tableId,
-
-        cart.map((l) => ({ productId: l.product.id, quantity: l.quantity })),
-
-        selectedCustomer?.id,
-
-      );
-
-      setExistingOrder(res.order);
-
-      setCart([]);
-
-      setMessage(res.order.promotionName
-
-        ? `Order sent — ${res.order.promotionName} applied (−₹${res.order.discount})`
-
-        : 'Order sent to kitchen.');
+      if (existingOrder?.status === 'DRAFT') {
+        const res = await updateDraftOrder(
+          existingOrder.id,
+          cart.map((l) => ({ productId: l.product.id, quantity: l.quantity })),
+        );
+        setExistingOrder(res.order);
+        setMessage(res.order.promotionName
+          ? `Order updated — ${res.order.promotionName} applied (−₹${res.order.discount})`
+          : 'Order updated and sent to kitchen.');
+      } else {
+        const res = await createOrder(
+          tableId,
+          cart.map((l) => ({ productId: l.product.id, quantity: l.quantity })),
+          selectedCustomer?.id,
+        );
+        setExistingOrder(res.order);
+        setCart([]);
+        setMessage(res.order.promotionName
+          ? `Order sent — ${res.order.promotionName} applied (−₹${res.order.discount})`
+          : 'Order sent to kitchen.');
+      }
 
     } catch (err) {
 
-      setError(err instanceof Error ? err.message : 'Failed to create order');
+      setError(err instanceof Error ? err.message : 'Failed to save order');
 
     } finally {
 
@@ -244,15 +265,17 @@ export default function OrderPage() {
 
 
 
-  async function handleApplyCoupon() {
+  async function handleApplyCouponWithCode(code: string) {
 
-    if (!existingOrder || !couponCode.trim()) return;
+    if (!existingOrder || !code.trim()) return;
 
     try {
 
-      const res = await validateCoupon(couponCode.trim(), existingOrder.subtotal, existingOrder.taxAmount);
+      const res = await validateCoupon(code.trim(), existingOrder.subtotal, existingOrder.taxAmount);
 
       setCouponDiscount(res.discount);
+
+      setCouponCode(code.trim());
 
       setMessage(`Coupon ${res.code} applied — ₹${res.discount.toFixed(0)} off`);
 
@@ -466,9 +489,8 @@ export default function OrderPage() {
 
                 return (
 
-                  <div key={cat.id} className="menu-category cafe-category" style={{ animationDelay: `${ci * 0.1}s` }}>
-
-                    <h3>{cat.name}</h3>
+                  <div key={cat.id} className="menu-category cafe-category" style={{ animationDelay: `${ci * 0.1}s`, borderColor: cat.color }}>
+                    <h3 style={{ color: cat.color }}>{cat.name}</h3>
 
                     <div className="product-grid cafe-food-grid">
 
@@ -492,7 +514,7 @@ export default function OrderPage() {
 
                           vegetarian={VEG_ITEMS.has(product.name)}
 
-                          disabled={!!existingOrder}
+                          disabled={existingOrder?.status === 'PAID'}
 
                           onAdd={() => addToCart(product)}
 
@@ -516,17 +538,11 @@ export default function OrderPage() {
 
               <h3>Your Order</h3>
 
-              {existingOrder ? (
+              {existingOrder?.status === 'PAID' ? (
 
                 <>
 
-                  <p className="pos-muted">#{existingOrder.orderNumber}</p>
-
-                  {existingOrder.promotionName && (
-
-                    <p className="pos-muted promo-line">{existingOrder.promotionName}: −₹{existingOrder.discount}</p>
-
-                  )}
+                  <p className="pos-muted">#{existingOrder.orderNumber} — Paid</p>
 
                   <ul className="cart-list">
 
@@ -534,17 +550,7 @@ export default function OrderPage() {
 
                       <li key={item.productId}>
 
-                        <img src={getFoodImage(item.productName)} alt="" className="cart-food-photo" />
-
-                        <div className="cart-item-details">
-
-                          <strong>{item.productName}</strong>
-
-                          <span className="pos-muted">×{item.quantity}</span>
-
-                        </div>
-
-                        <span>₹{item.lineTotal.toFixed(0)}</span>
+                        <strong>{item.productName}</strong> ×{item.quantity}
 
                       </li>
 
@@ -552,51 +558,21 @@ export default function OrderPage() {
 
                   </ul>
 
-                  <div className="cart-total cafe-total">
-
-                    <span>Total</span>
-
-                    <strong>
-
-                      ₹{couponDiscount != null
-
-                        ? (existingOrder.subtotal + existingOrder.taxAmount - couponDiscount).toFixed(0)
-
-                        : existingOrder.amount.toFixed(0)}
-
-                    </strong>
-
-                  </div>
-
-                  {existingOrder.status === 'DRAFT' && (
-
-                    <>
-
-                      <div className="coupon-row">
-
-                        <input className="pill-input cafe-input" placeholder="WELCOME10" value={couponCode}
-
-                          onChange={(e) => { setCouponCode(e.target.value); setCouponDiscount(null); }} />
-
-                        <button type="button" className="terminal-btn cafe-btn-outline" onClick={handleApplyCoupon}>Apply</button>
-
-                      </div>
-
-                      <button type="button" className="terminal-btn cafe-btn-primary cart-submit" onClick={() => setShowPayment(true)}>
-
-                        Pay & Close Table
-
-                      </button>
-
-                    </>
-
-                  )}
+                  <div className="cart-total cafe-total"><span>Total</span><strong>₹{existingOrder.amount.toFixed(0)}</strong></div>
 
                 </>
 
               ) : (
 
                 <>
+
+                  {existingOrder && <p className="pos-muted">#{existingOrder.orderNumber}</p>}
+
+                  {existingOrder?.promotionName && (
+
+                    <p className="pos-muted promo-line">{existingOrder.promotionName}: −₹{existingOrder.discount}</p>
+
+                  )}
 
                   {cart.length === 0 && <p className="pos-muted">Select items from the menu</p>}
 
@@ -636,13 +612,74 @@ export default function OrderPage() {
 
                     <>
 
-                      <div className="cart-total cafe-total"><span>Total</span><strong>₹{total.toFixed(0)}</strong></div>
+                      <div className="cart-total cafe-total">
 
-                      <button type="button" className="terminal-btn cafe-btn-primary cart-submit" onClick={handleSubmit} disabled={submitting}>
+                        <span>Total</span>
 
-                        {submitting ? 'Sending…' : 'Send to Kitchen'}
+                        <strong>
 
-                      </button>
+                          ₹{existingOrder
+
+                            ? (couponDiscount != null
+
+                              ? (existingOrder.subtotal + existingOrder.taxAmount - couponDiscount).toFixed(0)
+
+                              : existingOrder.amount.toFixed(0))
+
+                            : total.toFixed(0)}
+
+                        </strong>
+
+                      </div>
+
+                      {existingOrder && (
+                        <button type="button" className="terminal-btn cafe-btn-outline cart-action-btn"
+                          onClick={() => setShowDiscount(true)}>
+                          Discount / Coupon
+                        </button>
+                      )}
+
+                      {existingOrder && (
+
+                        <button type="button" className="terminal-btn cafe-btn-outline cart-action-btn"
+
+                          onClick={() => setShowReceiptEmail(true)}>
+
+                          Send Receipt
+
+                        </button>
+
+                      )}
+
+                      {!existingOrder && (
+
+                        <button type="button" className="terminal-btn cafe-btn-primary cart-submit" onClick={handleSubmit} disabled={submitting}>
+
+                          {submitting ? 'Sending…' : 'Send to Kitchen'}
+
+                        </button>
+
+                      )}
+
+                      {existingOrder?.status === 'DRAFT' && (
+
+                        <>
+
+                          <button type="button" className="terminal-btn cafe-btn-primary cart-submit" onClick={handleSubmit} disabled={submitting}>
+
+                            {submitting ? 'Updating…' : 'Update Order'}
+
+                          </button>
+
+                          <button type="button" className="terminal-btn cafe-btn-primary cart-submit" onClick={() => setShowPayment(true)}>
+
+                            Pay & Close Table
+
+                          </button>
+
+                        </>
+
+                      )}
 
                     </>
 
@@ -685,6 +722,22 @@ export default function OrderPage() {
               setReceiptOrder(null);
               navigate('/floor');
             }}
+          />
+        )}
+
+        {showDiscount && (
+          <DiscountModal
+            couponCode={couponCode}
+            onApply={(code) => { setCouponCode(code); handleApplyCouponWithCode(code); }}
+            onClose={() => setShowDiscount(false)}
+          />
+        )}
+
+        {showReceiptEmail && existingOrder && (
+          <ReceiptEmailModal
+            orderId={existingOrder.id}
+            defaultEmail={selectedCustomer?.email ?? undefined}
+            onClose={() => setShowReceiptEmail(false)}
           />
         )}
 

@@ -311,3 +311,23 @@
     grid-template-columns: 1fr;
   }
 }
+
+.dash-session-section {
+  padding: 0 0 1.5rem;
+}
+
+.dash-session-card {
+  background: #fffaf7;
+  border: 1px solid #e8ddd4;
+  border-radius: 16px;
+  padding: 1.25rem;
+  max-width: 480px;
+}
+
+.dash-session-card p {
+  margin: 0.35rem 0;
+}
+
+.dash-close-btn {
+  margin-top: 1rem;
+}

@@ -15,6 +15,13 @@
   min-width: 140px;
 }
 
+.reports-check {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
 .reports-metrics {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

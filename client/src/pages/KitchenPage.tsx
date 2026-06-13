@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import AppLayout from '../components/AppLayout';
 import { getFoodImage } from '../lib/foodImages';
-import { fetchKitchenQueue, Order, toggleKitchenItem, updateKitchenStatus } from '../lib/api';
+import {
+  fetchCategories,
+  fetchKitchenQueue,
+  fetchProducts,
+  Order,
+  toggleKitchenItem,
+  updateKitchenStatus,
+} from '../lib/api';
 import '../styles/pos.css';
 import '../styles/cafe-menu.css';
 
@@ -20,26 +27,43 @@ const STATUS_LABEL: Record<string, string> = {
 export default function KitchenPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [search, setSearch] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [productId, setProductId] = useState('');
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; color: string }>>([]);
+  const [products, setProducts] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const loadQueue = useCallback((q?: string) => {
-    fetchKitchenQueue(q)
+  const loadQueue = useCallback(() => {
+    fetchKitchenQueue({
+      q: search.trim() || undefined,
+      categoryId: categoryId || undefined,
+      productId: productId || undefined,
+    })
       .then((res) => setOrders(res.orders))
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load queue'))
       .finally(() => setLoading(false));
+  }, [search, categoryId, productId]);
+
+  useEffect(() => {
+    Promise.all([fetchCategories(), fetchProducts()])
+      .then(([c, p]) => {
+        setCategories(c.categories);
+        setProducts(p.products.filter((pr) => pr.sendToKitchen !== false).map((pr) => ({ id: pr.id, name: pr.name })));
+      })
+      .catch(() => undefined);
   }, []);
 
   useEffect(() => {
     loadQueue();
-    const timer = setInterval(() => loadQueue(search.trim() || undefined), 8000);
+    const timer = setInterval(loadQueue, 5000);
     return () => clearInterval(timer);
-  }, [loadQueue, search]);
+  }, [loadQueue]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    loadQueue(search.trim() || undefined);
+    loadQueue();
   }
 
   async function advanceStatus(order: Order) {
@@ -47,7 +71,7 @@ export default function KitchenPage() {
     if (!next) return;
     try {
       await updateKitchenStatus(order.id, next);
-      loadQueue(search.trim() || undefined);
+      loadQueue();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update');
     }
@@ -56,14 +80,14 @@ export default function KitchenPage() {
   async function handleItemToggle(order: Order, itemId: string) {
     try {
       await toggleKitchenItem(order.id, itemId);
-      loadQueue(search.trim() || undefined);
+      loadQueue();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update item');
     }
   }
 
   return (
-    <AppLayout title="Kitchen" subtitle="Live order queue">
+    <AppLayout title="Kitchen" subtitle="Kitchen Display (KDS)">
       <div className="pos-page kitchen-page">
         <form className="kitchen-search" onSubmit={handleSearch}>
           <input
@@ -72,7 +96,15 @@ export default function KitchenPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button type="submit" className="terminal-btn cafe-btn-outline">Search</button>
+          <select className="pill-input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            <option value="">All categories</option>
+            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          <select className="pill-input" value={productId} onChange={(e) => setProductId(e.target.value)}>
+            <option value="">All products</option>
+            {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+          <button type="submit" className="terminal-btn cafe-btn-outline">Filter</button>
         </form>
 
         {loading && <p className="pos-muted">Loading…</p>}

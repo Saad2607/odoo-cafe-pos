@@ -12,6 +12,7 @@ import { createOrder, formatOrder, updateDraftOrder } from '../services/order.js
 
 import { calculateDiscount, validateCoupon } from '../services/coupon.js';
 
+import { sendReceiptEmail } from '../services/receipt.js';
 import { applyPromotions } from '../services/promotion.js';
 
 
@@ -65,28 +66,33 @@ router.get('/session', authenticate, async (req: AuthRequest, res) => {
   try {
 
     const q = (req.query.q as string | undefined)?.trim();
+    const date = req.query.date as string | undefined;
 
     const filter: Record<string, unknown> = { sessionId: req.user!.sessionId };
 
-    if (q) {
-
-      filter.$or = [
-
-        { orderNumber: { $regex: q, $options: 'i' } },
-
-        { 'items.productName': { $regex: q, $options: 'i' } },
-
-      ];
-
+    if (date) {
+      const d = new Date(date);
+      const next = new Date(d);
+      next.setDate(next.getDate() + 1);
+      filter.date = { $gte: d, $lt: next };
     }
 
-    const orders = await Order.find(filter)
-
+    let orders = await Order.find(filter)
       .populate('tableId', 'tableNumber')
-
       .populate('customerId', 'name email phone')
-
       .sort({ createdAt: -1 });
+
+    if (q) {
+      const lower = q.toLowerCase();
+      orders = orders.filter((o) => {
+        const customer = o.customerId as { name?: string } | null;
+        return (
+          o.orderNumber.toLowerCase().includes(lower)
+          || o.items.some((i) => i.productName.toLowerCase().includes(lower))
+          || (customer?.name?.toLowerCase().includes(lower) ?? false)
+        );
+      });
+    }
 
     return res.json({ orders: orders.map(formatOrder) });
 
@@ -439,12 +445,17 @@ router.patch('/:id/pay', authenticate, async (req, res) => {
 
     const formatted = formatOrder(order);
 
+    let receiptResult = { emailed: false as boolean, to: undefined as string | undefined };
+    const emailTo = formatted.customer?.email;
+    if (emailTo) {
+      await sendReceiptEmail(order, emailTo);
+      receiptResult = { emailed: true, to: emailTo };
+    }
+
     return res.json({
       message: 'Payment successful',
       order: formatted,
-      receipt: formatted.customer?.email
-        ? { emailed: true, to: formatted.customer.email }
-        : { emailed: false },
+      receipt: receiptResult,
     });
 
   } catch (err) {
@@ -465,6 +476,22 @@ router.patch('/:id/pay', authenticate, async (req, res) => {
 
   }
 
+});
+
+
+
+router.post('/:id/send-receipt', authenticate, async (req, res) => {
+  try {
+    const data = z.object({ email: z.string().email() }).parse(req.body);
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    const result = await sendReceiptEmail(order, data.email);
+    return res.json({ message: 'Receipt sent', sent: result.sent, preview: result.preview });
+  } catch (err) {
+    if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors[0].message });
+    return res.status(500).json({ error: 'Failed to send receipt' });
+  }
 });
 
 

@@ -13,6 +13,7 @@ import AdminFloorPlanPage from './pages/AdminFloorPlanPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminDiscountsPage from './pages/AdminDiscountsPage';
 import ReportsPage from './pages/ReportsPage';
+import BookingsPage from './pages/BookingsPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/orders/:orderId" element={<OrderDetailPage />} />
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/kitchen" element={<KitchenPage />} />
+          <Route path="/bookings" element={<BookingsPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
           <Route path="/admin/floors" element={<AdminFloorPlanPage />} />

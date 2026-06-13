@@ -10,6 +10,7 @@ export interface IProduct extends Document {
   tax: number;
   description?: string;
   imageUrl?: string;
+  sendToKitchen: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -24,6 +25,7 @@ const schema = new Schema<IProduct>(
     tax: { type: Number, default: 0 },
     description: { type: String },
     imageUrl: { type: String },
+    sendToKitchen: { type: Boolean, default: true },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true },

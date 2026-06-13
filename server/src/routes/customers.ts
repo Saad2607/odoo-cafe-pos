@@ -70,4 +70,14 @@ router.patch('/:id', authenticate, async (req, res) => {
   }
 });
 
+router.delete('/:id', authenticate, async (req, res) => {
+  try {
+    const customer = await Customer.findByIdAndDelete(req.params.id);
+    if (!customer) return res.status(404).json({ error: 'Customer not found' });
+    return res.json({ message: 'Customer deleted' });
+  } catch {
+    return res.status(500).json({ error: 'Failed to delete customer' });
+  }
+});
+
 export default router;

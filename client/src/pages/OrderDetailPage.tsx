@@ -153,8 +153,11 @@ export default function OrderDetailPage() {
             <div className="order-card-actions">
               {order.status === 'DRAFT' && !editing && (
                 <>
-                  <button type="button" className="terminal-btn cafe-btn-outline"
-                    onClick={() => setEditing(true)}>Edit Items</button>
+                  {order.table && (
+                    <Link to={`/order/${order.table.id}`} className="terminal-btn cafe-btn-outline">
+                      Edit Order
+                    </Link>
+                  )}
                   {order.table && (
                     <Link to={`/order/${order.table.id}`} className="terminal-btn cafe-btn-primary">
                       Go to Pay
