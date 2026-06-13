@@ -103,7 +103,7 @@ export default function TerminalPage() {
             {closing ? 'Closing…' : 'Close Session & Log Out'}
           </button>
 
-          <div className="checkpoint-badge">✓ Phase 3 — Admin, Coupons & Session Close</div>
+          
         </div>
       </div>
     </TerminalLayout>

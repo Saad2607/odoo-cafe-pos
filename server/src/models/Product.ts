@@ -9,6 +9,7 @@ export interface IProduct extends Document {
   unitOfMeasure: string;
   tax: number;
   description?: string;
+  imageUrl?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -22,6 +23,7 @@ const schema = new Schema<IProduct>(
     unitOfMeasure: { type: String, required: true },
     tax: { type: Number, default: 0 },
     description: { type: String },
+    imageUrl: { type: String },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true },

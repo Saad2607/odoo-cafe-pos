@@ -1,11 +1,15 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import TerminalPage from './pages/TerminalPage';
+import DashboardPage from './pages/DashboardPage';
 import FloorPlanPage from './pages/FloorPlanPage';
 import OrderPage from './pages/OrderPage';
 import KitchenPage from './pages/KitchenPage';
 import AdminProductsPage from './pages/AdminProductsPage';
+import OrdersPage from './pages/OrdersPage';
+import CustomersPage from './pages/CustomersPage';
+import AdminSettingsPage from './pages/AdminSettingsPage';
+import AdminFloorPlanPage from './pages/AdminFloorPlanPage';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 
 export default function App() {
@@ -20,11 +24,16 @@ export default function App() {
         </Route>
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/terminal" element={<TerminalPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/terminal" element={<Navigate to="/dashboard" replace />} />
           <Route path="/floor" element={<FloorPlanPage />} />
           <Route path="/order/:tableId" element={<OrderPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/customers" element={<CustomersPage />} />
           <Route path="/kitchen" element={<KitchenPage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
+          <Route path="/admin/floors" element={<AdminFloorPlanPage />} />
+          <Route path="/admin/settings" element={<AdminSettingsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

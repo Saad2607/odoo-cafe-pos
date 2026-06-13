@@ -29,6 +29,7 @@ export interface Product {
   unitOfMeasure: string;
   tax: number;
   description: string;
+  imageUrl?: string | null;
   isActive?: boolean;
   category: Category | null;
 }
@@ -38,6 +39,18 @@ export interface TableInfo {
   tableNumber: number;
   seats: number;
   status: 'FREE' | 'OCCUPIED';
+  isActive?: boolean;
+}
+
+export interface AdminFloor {
+  id: string;
+  name: string;
+  tables: Array<{
+    id: string;
+    tableNumber: number;
+    seats: number;
+    isActive: boolean;
+  }>;
 }
 
 export interface Floor {
@@ -64,10 +77,30 @@ export interface Order {
   taxAmount: number;
   discount: number;
   couponCode?: string | null;
+  promotionName?: string | null;
+  paymentMethod?: 'CASH' | 'CARD' | 'UPI' | null;
+  amountReceived?: number | null;
+  changeDue?: number | null;
+  cardReference?: string | null;
   status: 'DRAFT' | 'PAID' | 'CANCELLED';
   kitchenStatus: 'NONE' | 'PENDING' | 'PREPARING' | 'READY' | 'SERVED';
   table: { id: string; tableNumber: number } | null;
+  customer: { id: string; name: string; email: string | null; phone: string | null } | null;
   items: OrderItem[];
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+}
+
+export interface PaymentSettings {
+  cashEnabled: boolean;
+  cardEnabled: boolean;
+  upiEnabled: boolean;
+  upiId: string;
 }
 
 export interface AuthResponse {
@@ -107,6 +140,11 @@ export function getStoredSession(): PosSession | null {
   return raw ? JSON.parse(raw) : null;
 }
 
+/** PDF: Employee → floor popup on session start; Admin → dashboard */
+export function getHomeRoute(role: User['role']): string {
+  return role === 'EMPLOYEE' ? '/floor' : '/dashboard';
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
@@ -139,6 +177,52 @@ export async function fetchFloors() {
   return apiFetch<{ floors: Floor[] }>('/floors');
 }
 
+export async function fetchAdminFloors() {
+  return apiFetch<{ floors: AdminFloor[] }>('/floors/manage');
+}
+
+export async function createFloor(name: string) {
+  return apiFetch<{ floor: AdminFloor }>('/floors', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  });
+}
+
+export async function updateFloor(floorId: string, name: string) {
+  return apiFetch<{ floor: { id: string; name: string } }>(`/floors/${floorId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ name }),
+  });
+}
+
+export async function deleteFloor(floorId: string) {
+  return apiFetch<{ message: string }>(`/floors/${floorId}`, { method: 'DELETE' });
+}
+
+export async function addTable(
+  floorId: string,
+  data: { tableNumber: number; seats: number; isActive?: boolean },
+) {
+  return apiFetch<{ table: AdminFloor['tables'][0] }>(`/floors/${floorId}/tables`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateTable(
+  tableId: string,
+  data: Partial<{ tableNumber: number; seats: number; isActive: boolean }>,
+) {
+  return apiFetch<{ table: AdminFloor['tables'][0] }>(`/floors/tables/${tableId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteTable(tableId: string) {
+  return apiFetch<{ message: string }>(`/floors/tables/${tableId}`, { method: 'DELETE' });
+}
+
 export async function fetchProducts() {
   return apiFetch<{ products: Product[] }>('/products');
 }
@@ -147,17 +231,33 @@ export async function fetchTableOrder(tableId: string) {
   return apiFetch<{ order: Order | null }>(`/orders/table/${tableId}`);
 }
 
-export async function createOrder(tableId: string, items: { productId: string; quantity: number }[]) {
+export async function createOrder(
+  tableId: string,
+  items: { productId: string; quantity: number }[],
+  customerId?: string,
+) {
   return apiFetch<{ message: string; order: Order }>('/orders', {
     method: 'POST',
-    body: JSON.stringify({ tableId, items }),
+    body: JSON.stringify({ tableId, items, customerId }),
   });
 }
 
-export async function payOrder(orderId: string, couponCode?: string) {
-  return apiFetch<{ message: string; order: Order }>(`/orders/${orderId}/pay`, {
+export async function payOrder(
+  orderId: string,
+  data: {
+    paymentMethod: 'CASH' | 'CARD' | 'UPI';
+    couponCode?: string;
+    amountReceived?: number;
+    cardReference?: string;
+  },
+) {
+  return apiFetch<{
+    message: string;
+    order: Order;
+    receipt?: { emailed: boolean; to?: string };
+  }>(`/orders/${orderId}/pay`, {
     method: 'PATCH',
-    body: JSON.stringify(couponCode ? { couponCode } : {}),
+    body: JSON.stringify(data),
   });
 }
 
@@ -250,4 +350,76 @@ export async function updateKitchenStatus(orderId: string, kitchenStatus: Order[
     method: 'PATCH',
     body: JSON.stringify({ kitchenStatus }),
   });
+}
+
+export async function fetchSessionOrders(q?: string) {
+  const query = q ? `?q=${encodeURIComponent(q)}` : '';
+  return apiFetch<{ orders: Order[] }>(`/orders/session${query}`);
+}
+
+export async function fetchOrder(orderId: string) {
+  return apiFetch<{ order: Order }>(`/orders/${orderId}`);
+}
+
+export async function cancelOrder(orderId: string) {
+  return apiFetch<{ message: string }>(`/orders/${orderId}`, { method: 'DELETE' });
+}
+
+export async function assignOrderCustomer(orderId: string, customerId: string | null) {
+  return apiFetch<{ order: Order }>(`/orders/${orderId}/customer`, {
+    method: 'PATCH',
+    body: JSON.stringify({ customerId }),
+  });
+}
+
+export async function fetchCustomers(q?: string) {
+  const query = q ? `?q=${encodeURIComponent(q)}` : '';
+  return apiFetch<{ customers: Customer[] }>(`/customers${query}`);
+}
+
+export async function createCustomer(data: { name: string; email?: string; phone?: string }) {
+  return apiFetch<{ customer: Customer }>('/customers', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateCustomer(id: string, data: Partial<{ name: string; email: string; phone: string }>) {
+  return apiFetch<{ customer: Customer }>(`/customers/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchPaymentSettings() {
+  return apiFetch<{ settings: PaymentSettings }>('/payment-settings');
+}
+
+export async function updatePaymentSettings(data: Partial<PaymentSettings>) {
+  return apiFetch<{ settings: PaymentSettings }>('/payment-settings', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function createCategory(data: { name: string; color: string }) {
+  return apiFetch<{ category: Category }>('/categories', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateCategory(id: string, data: Partial<{ name: string; color: string }>) {
+  return apiFetch<{ category: Category }>(`/categories/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteCategory(id: string) {
+  return apiFetch<{ message: string }>(`/categories/${id}`, { method: 'DELETE' });
+}
+
+export async function fetchAllCategories() {
+  return apiFetch<{ categories: Category[] }>('/categories');
 }

@@ -1,275 +1,686 @@
 import { useEffect, useMemo, useState } from 'react';
+
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import TerminalLayout from '../components/TerminalLayout';
+
+import AppLayout from '../components/AppLayout';
+
+import FoodCard from '../components/FoodCard';
+
+import PaymentModal from '../components/PaymentModal';
+
+import { getFoodImage } from '../lib/foodImages';
+
 import {
+
+  assignOrderCustomer,
+
+  createCustomer,
+
   createOrder,
+
+  fetchCustomers,
+
   fetchProducts,
+
   fetchTableOrder,
-  payOrder,
+
   validateCoupon,
+
   Product,
+
   Order,
+
+  Customer,
+
 } from '../lib/api';
+
 import '../styles/pos.css';
 
-interface CartLine {
-  product: Product;
-  quantity: number;
-}
+import '../styles/cafe-menu.css';
+
+
+
+const VEG_ITEMS = new Set([
+
+  'Pesto Eggs on Toast', 'Beetroot Avocado Toast', 'Veg Ragout & Herb Labneh',
+
+  'Tropical Smoothie Bowl', 'Cocoa Raspberry Smoothie Bowl', 'Granola Bowl',
+
+  'Honey Butter French Toast', 'Ricotta Pancakes',
+
+]);
+
+
+
+interface CartLine { product: Product; quantity: number; }
+
+
 
 export default function OrderPage() {
+
   const { tableId } = useParams<{ tableId: string }>();
+
   const navigate = useNavigate();
+
   const [products, setProducts] = useState<Product[]>([]);
+
   const [existingOrder, setExistingOrder] = useState<Order | null>(null);
+
   const [cart, setCart] = useState<CartLine[]>([]);
+
   const [loading, setLoading] = useState(true);
+
   const [submitting, setSubmitting] = useState(false);
+
   const [error, setError] = useState('');
+
   const [message, setMessage] = useState('');
+
   const [couponCode, setCouponCode] = useState('');
+
   const [couponDiscount, setCouponDiscount] = useState<number | null>(null);
 
+  const [search, setSearch] = useState('');
+
+  const [showPayment, setShowPayment] = useState(false);
+
+  const [customerSearch, setCustomerSearch] = useState('');
+
+  const [customers, setCustomers] = useState<Customer[]>([]);
+
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  const [showCustomerPicker, setShowCustomerPicker] = useState(false);
+
+
+
   useEffect(() => {
+
     if (!tableId) return;
 
     Promise.all([fetchProducts(), fetchTableOrder(tableId)])
+
       .then(([productRes, orderRes]) => {
+
         setProducts(productRes.products);
+
         setExistingOrder(orderRes.order);
+
+        if (orderRes.order?.customer) {
+
+          setSelectedCustomer(orderRes.order.customer);
+
+        }
+
       })
-      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load order view'))
+
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load menu'))
+
       .finally(() => setLoading(false));
+
   }, [tableId]);
 
+
+
   const categories = useMemo(() => {
+
     const map = new Map<string, { id: string; name: string; color: string }>();
+
     for (const p of products) {
+
       if (p.category) map.set(p.category.id, p.category);
+
     }
+
     return Array.from(map.values());
+
   }, [products]);
 
-  const subtotal = cart.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
-  const tax = cart.reduce(
-    (sum, line) => sum + line.product.price * line.quantity * (line.product.tax / 100),
-    0,
-  );
-  const total = subtotal + tax;
+
+
+  const filteredProducts = useMemo(() => {
+
+    const q = search.trim().toLowerCase();
+
+    if (!q) return products;
+
+    return products.filter((p) =>
+
+      p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q),
+
+    );
+
+  }, [products, search]);
+
+
+
+  const total = cart.reduce((sum, line) => {
+
+    const lineTotal = line.product.price * line.quantity;
+
+    return sum + lineTotal + lineTotal * (line.product.tax / 100);
+
+  }, 0);
+
+
 
   function addToCart(product: Product) {
+
     setCart((prev) => {
-      const existing = prev.find((line) => line.product.id === product.id);
+
+      const existing = prev.find((l) => l.product.id === product.id);
+
       if (existing) {
-        return prev.map((line) =>
-          line.product.id === product.id
-            ? { ...line, quantity: line.quantity + 1 }
-            : line,
-        );
+
+        return prev.map((l) => l.product.id === product.id ? { ...l, quantity: l.quantity + 1 } : l);
+
       }
+
       return [...prev, { product, quantity: 1 }];
+
     });
+
   }
+
+
 
   function changeQty(productId: string, delta: number) {
+
     setCart((prev) =>
-      prev
-        .map((line) =>
-          line.product.id === productId
-            ? { ...line, quantity: line.quantity + delta }
-            : line,
-        )
-        .filter((line) => line.quantity > 0),
+
+      prev.map((l) => l.product.id === productId ? { ...l, quantity: l.quantity + delta } : l)
+
+        .filter((l) => l.quantity > 0),
+
     );
+
   }
+
+
 
   async function handleSubmit() {
+
     if (!tableId || !cart.length) return;
+
     setSubmitting(true);
+
     setError('');
-    setMessage('');
 
     try {
+
       const res = await createOrder(
+
         tableId,
-        cart.map((line) => ({ productId: line.product.id, quantity: line.quantity })),
+
+        cart.map((l) => ({ productId: l.product.id, quantity: l.quantity })),
+
+        selectedCustomer?.id,
+
       );
+
       setExistingOrder(res.order);
+
       setCart([]);
-      setMessage('Order sent to kitchen!');
+
+      setMessage(res.order.promotionName
+
+        ? `Order sent — ${res.order.promotionName} applied (−₹${res.order.discount})`
+
+        : 'Order sent to kitchen.');
+
     } catch (err) {
+
       setError(err instanceof Error ? err.message : 'Failed to create order');
+
     } finally {
+
       setSubmitting(false);
+
     }
+
   }
+
+
 
   async function handleApplyCoupon() {
+
     if (!existingOrder || !couponCode.trim()) return;
-    setError('');
+
     try {
-      const res = await validateCoupon(
-        couponCode.trim(),
-        existingOrder.subtotal,
-        existingOrder.taxAmount,
-      );
+
+      const res = await validateCoupon(couponCode.trim(), existingOrder.subtotal, existingOrder.taxAmount);
+
       setCouponDiscount(res.discount);
-      setMessage(`Coupon ${res.code} applied — ₹${res.discount.toFixed(2)} off`);
+
+      setMessage(`Coupon ${res.code} applied — ₹${res.discount.toFixed(0)} off`);
+
     } catch (err) {
+
       setCouponDiscount(null);
+
       setError(err instanceof Error ? err.message : 'Invalid coupon');
+
     }
+
   }
 
-  async function handlePay() {
-    if (!existingOrder) return;
-    setSubmitting(true);
-    setError('');
+
+
+  async function searchCustomers(q: string) {
+
+    setCustomerSearch(q);
+
+    if (q.length < 2) { setCustomers([]); return; }
+
+    const res = await fetchCustomers(q);
+
+    setCustomers(res.customers);
+
+  }
+
+
+
+  async function assignCustomer(customer: Customer) {
+
+    if (!existingOrder) {
+
+      setSelectedCustomer(customer);
+
+      setShowCustomerPicker(false);
+
+      return;
+
+    }
 
     try {
-      const res = await payOrder(
-        existingOrder.id,
-        couponCode.trim() || undefined,
-      );
+
+      const res = await assignOrderCustomer(existingOrder.id, customer.id);
+
       setExistingOrder(res.order);
-      setMessage('Payment complete — table is free.');
-      setTimeout(() => navigate('/floor'), 1200);
+
+      setSelectedCustomer(customer);
+
+      setShowCustomerPicker(false);
+
+      setMessage(`Customer ${customer.name} assigned`);
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Payment failed');
-    } finally {
-      setSubmitting(false);
+
+      setError(err instanceof Error ? err.message : 'Failed to assign customer');
+
     }
+
   }
+
+
+
+  async function quickCreateCustomer() {
+
+    if (!customerSearch.trim()) return;
+
+    try {
+
+      const res = await createCustomer({ name: customerSearch.trim() });
+
+      await assignCustomer(res.customer);
+
+    } catch (err) {
+
+      setError(err instanceof Error ? err.message : 'Failed to create customer');
+
+    }
+
+  }
+
+
+
+  function handlePaymentSuccess(order: Order, receiptMsg?: string) {
+
+    setShowPayment(false);
+
+    setExistingOrder(order);
+
+    setMessage(receiptMsg || 'Payment complete.');
+
+    setTimeout(() => navigate('/floor'), 1500);
+
+  }
+
+
 
   return (
-    <TerminalLayout title="Order View" subtitle={tableId ? `Table order` : 'POS'}>
-      <div className="pos-page order-page">
+
+    <AppLayout title="Breakfast Menu" subtitle="Savoury & Sweet">
+
+      <div className="pos-page order-page cafe-order-page">
+
+        <Link to="/floor" className="cafe-back-link">← Back to Floor Plan</Link>
+
+
+
+        <header className="cafe-order-header">
+
+          <h2>BRIVIO</h2>
+
+          <p>FROM 8:00 TO 11.30AM</p>
+
+        </header>
+
+
+
         <div className="order-toolbar">
-          <Link to="/floor" className="pos-link">← Back to Floor Plan</Link>
+
+          <input
+
+            className="pill-input order-search"
+
+            placeholder="Search products…"
+
+            value={search}
+
+            onChange={(e) => setSearch(e.target.value)}
+
+          />
+
+          <button
+
+            type="button"
+
+            className="terminal-btn cafe-btn-outline"
+
+            onClick={() => setShowCustomerPicker(!showCustomerPicker)}
+
+          >
+
+            {selectedCustomer ? selectedCustomer.name : 'Assign Customer'}
+
+          </button>
+
         </div>
 
+
+
+        {showCustomerPicker && (
+
+          <div className="customer-picker">
+
+            <input
+
+              className="pill-input"
+
+              placeholder="Search or type new name…"
+
+              value={customerSearch}
+
+              onChange={(e) => searchCustomers(e.target.value)}
+
+            />
+
+            {customers.map((c) => (
+
+              <button key={c.id} type="button" className="customer-pick-btn" onClick={() => assignCustomer(c)}>
+
+                {c.name} {c.email && <span className="pos-muted">{c.email}</span>}
+
+              </button>
+
+            ))}
+
+            {customerSearch.trim().length >= 2 && (
+
+              <button type="button" className="terminal-btn cafe-btn-outline" onClick={quickCreateCustomer}>
+
+                Create "{customerSearch.trim()}"
+
+              </button>
+
+            )}
+
+          </div>
+
+        )}
+
+
+
         {loading && <p className="pos-muted">Loading menu…</p>}
+
         {error && <div className="pos-error">{error}</div>}
+
         {message && <div className="pos-success">{message}</div>}
 
+
+
         {!loading && (
+
           <div className="order-layout">
-            <section className="menu-panel">
-              {categories.map((cat) => (
-                <div key={cat.id} className="menu-category">
-                  <h3 style={{ borderColor: cat.color }}>{cat.name}</h3>
-                  <div className="product-grid">
-                    {products
-                      .filter((p) => p.category?.id === cat.id)
-                      .map((product) => (
-                        <button
+
+            <section className="menu-panel cafe-menu-panel">
+
+              {categories.map((cat, ci) => {
+
+                const catProducts = filteredProducts.filter((p) => p.category?.id === cat.id);
+
+                if (!catProducts.length) return null;
+
+                return (
+
+                  <div key={cat.id} className="menu-category cafe-category" style={{ animationDelay: `${ci * 0.1}s` }}>
+
+                    <h3>{cat.name}</h3>
+
+                    <div className="product-grid cafe-food-grid">
+
+                      {catProducts.map((product) => (
+
+                        <FoodCard
+
                           key={product.id}
-                          type="button"
-                          className="product-card"
-                          onClick={() => addToCart(product)}
+
+                          name={product.name}
+
+                          description={product.description}
+
+                          price={product.price}
+
+                          tax={product.tax}
+
+                          imageUrl={product.imageUrl}
+
+                          accent={cat.color}
+
+                          vegetarian={VEG_ITEMS.has(product.name)}
+
                           disabled={!!existingOrder}
-                        >
-                          <span className="product-name">{product.name}</span>
-                          <span className="product-price">₹{product.price.toFixed(2)}</span>
-                          <span className="product-tax">{product.tax}% tax</span>
-                        </button>
+
+                          onAdd={() => addToCart(product)}
+
+                        />
+
                       ))}
+
+                    </div>
+
                   </div>
-                </div>
-              ))}
+
+                );
+
+              })}
+
             </section>
 
-            <aside className="cart-panel">
-              <h3>Current Order</h3>
+
+
+            <aside className="cart-panel cafe-cart">
+
+              <h3>Your Order</h3>
+
               {existingOrder ? (
+
                 <>
+
                   <p className="pos-muted">#{existingOrder.orderNumber}</p>
+
+                  {existingOrder.promotionName && (
+
+                    <p className="pos-muted promo-line">{existingOrder.promotionName}: −₹{existingOrder.discount}</p>
+
+                  )}
+
                   <ul className="cart-list">
+
                     {existingOrder.items.map((item) => (
+
                       <li key={item.productId}>
-                        <span>{item.productName} × {item.quantity}</span>
-                        <span>₹{item.lineTotal.toFixed(2)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="cart-total">
-                    <span>Total</span>
-                    <strong>
-                      ₹{couponDiscount != null
-                        ? (existingOrder.subtotal + existingOrder.taxAmount - couponDiscount).toFixed(2)
-                        : existingOrder.amount.toFixed(2)}
-                    </strong>
-                  </div>
-                  {couponDiscount != null && (
-                    <p className="pos-muted">Discount: −₹{couponDiscount.toFixed(2)}</p>
-                  )}
-                  <p className="kitchen-pill">Kitchen: {existingOrder.kitchenStatus}</p>
-                  {existingOrder.status === 'DRAFT' && (
-                    <>
-                      <div className="coupon-row">
-                        <input
-                          className="pill-input"
-                          placeholder="Coupon (e.g. WELCOME10)"
-                          value={couponCode}
-                          onChange={(e) => { setCouponCode(e.target.value); setCouponDiscount(null); }}
-                        />
-                        <button type="button" className="terminal-btn terminal-btn-secondary"
-                          onClick={handleApplyCoupon}>Apply</button>
-                      </div>
-                      <button
-                      type="button"
-                      className="terminal-btn terminal-btn-primary cart-submit"
-                      onClick={handlePay}
-                      disabled={submitting}
-                    >
-                      {submitting ? 'Processing…' : 'Pay & Close Table'}
-                    </button>
-                    </>
-                  )}
-                  {existingOrder.status === 'PAID' && (
-                    <p className="pos-success">Paid — table released</p>
-                  )}
-                </>
-              ) : (
-                <>
-                  {cart.length === 0 && <p className="pos-muted">Tap products to add items</p>}
-                  <ul className="cart-list">
-                    {cart.map((line) => (
-                      <li key={line.product.id}>
-                        <div>
-                          <span>{line.product.name}</span>
-                          <div className="qty-controls">
-                            <button type="button" onClick={() => changeQty(line.product.id, -1)}>−</button>
-                            <span>{line.quantity}</span>
-                            <button type="button" onClick={() => changeQty(line.product.id, 1)}>+</button>
-                          </div>
+
+                        <img src={getFoodImage(item.productName)} alt="" className="cart-food-photo" />
+
+                        <div className="cart-item-details">
+
+                          <strong>{item.productName}</strong>
+
+                          <span className="pos-muted">×{item.quantity}</span>
+
                         </div>
-                        <span>₹{(line.product.price * line.quantity).toFixed(2)}</span>
+
+                        <span>₹{item.lineTotal.toFixed(0)}</span>
+
                       </li>
+
                     ))}
+
                   </ul>
-                  {cart.length > 0 && (
+
+                  <div className="cart-total cafe-total">
+
+                    <span>Total</span>
+
+                    <strong>
+
+                      ₹{couponDiscount != null
+
+                        ? (existingOrder.subtotal + existingOrder.taxAmount - couponDiscount).toFixed(0)
+
+                        : existingOrder.amount.toFixed(0)}
+
+                    </strong>
+
+                  </div>
+
+                  {existingOrder.status === 'DRAFT' && (
+
                     <>
-                      <div className="cart-total">
-                        <span>Total</span>
-                        <strong>₹{total.toFixed(2)}</strong>
+
+                      <div className="coupon-row">
+
+                        <input className="pill-input cafe-input" placeholder="WELCOME10" value={couponCode}
+
+                          onChange={(e) => { setCouponCode(e.target.value); setCouponDiscount(null); }} />
+
+                        <button type="button" className="terminal-btn cafe-btn-outline" onClick={handleApplyCoupon}>Apply</button>
+
                       </div>
-                      <button
-                        type="button"
-                        className="terminal-btn terminal-btn-primary cart-submit"
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                      >
-                        {submitting ? 'Sending…' : 'Send to Kitchen'}
+
+                      <button type="button" className="terminal-btn cafe-btn-primary cart-submit" onClick={() => setShowPayment(true)}>
+
+                        Pay & Close Table
+
                       </button>
+
                     </>
+
                   )}
+
                 </>
+
+              ) : (
+
+                <>
+
+                  {cart.length === 0 && <p className="pos-muted">Select items from the menu</p>}
+
+                  <ul className="cart-list">
+
+                    {cart.map((line) => (
+
+                      <li key={line.product.id}>
+
+                        <img src={getFoodImage(line.product.name, line.product.imageUrl)} alt="" className="cart-food-photo" />
+
+                        <div className="cart-item-details">
+
+                          <strong>{line.product.name}</strong>
+
+                          <div className="qty-controls">
+
+                            <button type="button" onClick={() => changeQty(line.product.id, -1)}>−</button>
+
+                            <span>{line.quantity}</span>
+
+                            <button type="button" onClick={() => changeQty(line.product.id, 1)}>+</button>
+
+                          </div>
+
+                        </div>
+
+                        <span>₹{(line.product.price * line.quantity).toFixed(0)}</span>
+
+                      </li>
+
+                    ))}
+
+                  </ul>
+
+                  {cart.length > 0 && (
+
+                    <>
+
+                      <div className="cart-total cafe-total"><span>Total</span><strong>₹{total.toFixed(0)}</strong></div>
+
+                      <button type="button" className="terminal-btn cafe-btn-primary cart-submit" onClick={handleSubmit} disabled={submitting}>
+
+                        {submitting ? 'Sending…' : 'Send to Kitchen'}
+
+                      </button>
+
+                    </>
+
+                  )}
+
+                </>
+
               )}
+
             </aside>
+
           </div>
+
         )}
+
+
+
+        {showPayment && existingOrder && (
+
+          <PaymentModal
+
+            order={existingOrder}
+
+            couponCode={couponCode}
+
+            couponDiscount={couponDiscount}
+
+            onClose={() => setShowPayment(false)}
+
+            onSuccess={handlePaymentSuccess}
+
+          />
+
+        )}
+
       </div>
-    </TerminalLayout>
+
+    </AppLayout>
+
   );
+
 }
+

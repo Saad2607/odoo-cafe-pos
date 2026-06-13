@@ -1,8 +1,8 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'DM Sans', sans-serif;
-  color: #3D405B;
-  background: #faf7f2;
+  color: #2C2C2C;
+  background: #F5F0E8;
 }
 #root { min-height: 100vh; }
 a { color: inherit; }

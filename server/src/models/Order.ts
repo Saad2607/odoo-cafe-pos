@@ -4,6 +4,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export type OrderStatus = 'DRAFT' | 'PAID' | 'CANCELLED';
 export type KitchenStatus = 'NONE' | 'PENDING' | 'PREPARING' | 'READY' | 'SERVED';
+export type PaymentMethod = 'CASH' | 'CARD' | 'UPI';
 
 export interface IOrderItem {
   productId: Types.ObjectId;
@@ -23,6 +24,11 @@ export interface IOrder extends Document {
   taxAmount: number;
   discount: number;
   couponCode?: string;
+  promotionName?: string;
+  paymentMethod?: PaymentMethod;
+  amountReceived?: number;
+  changeDue?: number;
+  cardReference?: string;
   status: OrderStatus;
   kitchenStatus: KitchenStatus;
   tableId?: Types.ObjectId;
@@ -55,6 +61,11 @@ const orderSchema = new Schema<IOrder>(
     taxAmount: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },
     couponCode: { type: String },
+    promotionName: { type: String },
+    paymentMethod: { type: String, enum: ['CASH', 'CARD', 'UPI'] },
+    amountReceived: { type: Number },
+    changeDue: { type: Number },
+    cardReference: { type: String },
     status: { type: String, enum: ['DRAFT', 'PAID', 'CANCELLED'], default: 'DRAFT' },
     kitchenStatus: {
       type: String,

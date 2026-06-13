@@ -1,0 +1,244 @@
+.floor-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 36, 32, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  padding: 1.5rem;
+  backdrop-filter: blur(4px);
+}
+
+.floor-popup {
+  background: #FDFBF7;
+  border-radius: 20px;
+  width: min(720px, 100%);
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+  border: 1px solid #E8DFD4;
+}
+
+.floor-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #E8DFD4;
+  background: linear-gradient(180deg, #FFF 0%, #FDFBF7 100%);
+}
+
+.floor-popup-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #9E4B3A;
+  letter-spacing: 0.04em;
+}
+
+.floor-popup-header p {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: #7A7268;
+}
+
+.floor-popup-close {
+  background: #F5F0E8;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: #5C534A;
+  transition: background 0.15s;
+}
+
+.floor-popup-close:hover {
+  background: #E8DFD4;
+}
+
+.floor-popup-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+  overflow-y: auto;
+}
+
+.floor-popup-section {
+  margin-bottom: 1.25rem;
+}
+
+.floor-popup-section h3 {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: #9E4B3A;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+}
+
+.floor-popup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.75rem;
+}
+
+.floor-table-btn {
+  background: #FFF;
+  border: 2px solid #D4C9BC;
+  border-radius: 14px;
+  padding: 1rem 0.75rem;
+  text-align: center;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.floor-table-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(158, 75, 58, 0.12);
+  border-color: #9E4B3A;
+}
+
+.floor-table-btn.occupied {
+  border-color: #E65100;
+  background: linear-gradient(180deg, #FFF8F0 0%, #FFF3E0 100%);
+}
+
+.floor-table-btn .num {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #2C2C2C;
+}
+
+.floor-table-btn .seats {
+  display: block;
+  font-size: 0.75rem;
+  color: #7A7268;
+  margin: 0.2rem 0 0.5rem;
+}
+
+.floor-table-btn .badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.floor-table-btn .badge.free {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.floor-table-btn .badge.occupied {
+  background: #FFF3E0;
+  color: #E65100;
+}
+
+/* Admin floor plan page */
+.admin-floor-page {
+  padding: 1.5rem 2rem 2.5rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.admin-floor-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-floor-toolbar .pill-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.admin-floor-card {
+  background: #FDFBF7;
+  border: 1px solid #E8DFD4;
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-floor-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-floor-card-head h3 {
+  margin: 0;
+  color: #9E4B3A;
+}
+
+.admin-table-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.admin-table-form .pill-input {
+  width: 100px;
+}
+
+.admin-table-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-table-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #F0E6DC;
+  flex-wrap: wrap;
+}
+
+.admin-table-list li span {
+  font-size: 0.9rem;
+}
+
+.admin-table-list .table-num {
+  font-weight: 700;
+  min-width: 80px;
+}
+
+.table-inactive {
+  opacity: 0.5;
+}
+
+.status-pill {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.status-pill.active {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.status-pill.inactive {
+  background: #EEEEEE;
+  color: #757575;
+}
+
+.admin-table-list .actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.35rem;
+}

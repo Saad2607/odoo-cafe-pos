@@ -1,0 +1,132 @@
+/* Unified button system — cafe POS */
+
+.btn,
+.terminal-btn,
+a.terminal-btn,
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  border: 2px solid transparent;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.btn:disabled,
+.terminal-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn:not(:disabled):hover,
+.terminal-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary,
+.terminal-btn-primary,
+.cafe-btn-primary {
+  background: linear-gradient(135deg, #9E4B3A 0%, #8A3F30 100%) !important;
+  color: #FDFBF7 !important;
+  border-color: #9E4B3A !important;
+  box-shadow: 0 4px 14px rgba(158, 75, 58, 0.25);
+}
+
+.btn-primary:not(:disabled):hover,
+.terminal-btn-primary:not(:disabled):hover,
+.cafe-btn-primary:not(:disabled):hover {
+  background: linear-gradient(135deg, #8A3F30 0%, #7A3628 100%) !important;
+  box-shadow: 0 6px 18px rgba(158, 75, 58, 0.32);
+}
+
+.btn-outline,
+.terminal-btn-secondary,
+.cafe-btn-outline {
+  background: #FDFBF7 !important;
+  color: #9E4B3A !important;
+  border: 2px solid #C4A99A !important;
+  box-shadow: none;
+}
+
+.btn-outline:not(:disabled):hover,
+.terminal-btn-secondary:not(:disabled):hover,
+.cafe-btn-outline:not(:disabled):hover {
+  background: #F9F0E8 !important;
+  border-color: #9E4B3A !important;
+}
+
+.btn-danger,
+.cafe-btn-danger {
+  background: #FFF5F5 !important;
+  color: #B71C1C !important;
+  border: 2px solid #FFCDD2 !important;
+  box-shadow: none;
+}
+
+.btn-danger:not(:disabled):hover,
+.cafe-btn-danger:not(:disabled):hover {
+  background: #FFEBEE !important;
+  border-color: #E57373 !important;
+}
+
+.btn-sm {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  border-radius: 8px;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.qty-controls button {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 2px solid #E8DFD4;
+  background: #FDFBF7;
+  color: #9E4B3A;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.qty-controls button:hover {
+  background: #9E4B3A;
+  color: #FDFBF7;
+  border-color: #9E4B3A;
+}
+
+.pill-input {
+  padding: 0.65rem 1rem;
+  border: 2px solid #E8DFD4;
+  border-radius: 10px;
+  background: #FDFBF7;
+  font-size: 0.9rem;
+  color: #2C2C2C;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.pill-input:focus {
+  border-color: #9E4B3A;
+  box-shadow: 0 0 0 3px rgba(158, 75, 58, 0.12);
+}
+
+.pill-input::placeholder {
+  color: #A89F94;
+}

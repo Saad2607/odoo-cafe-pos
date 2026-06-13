@@ -1,0 +1,359 @@
+/* Gen Z — playful POS aesthetic */
+
+@keyframes genz-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(6deg); }
+}
+
+@keyframes genz-pop-in {
+  from { opacity: 0; transform: scale(0.85) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes genz-bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.92); }
+  70% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@keyframes genz-pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(255, 143, 171, 0.5); }
+  70% { box-shadow: 0 0 0 14px rgba(255, 143, 171, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 143, 171, 0); }
+}
+
+@keyframes genz-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.genz-order-page {
+  position: relative;
+  overflow: hidden;
+}
+
+.genz-order-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #fff0f6 0%, #f0fff8 40%, #fff9e6 100%);
+  z-index: -2;
+}
+
+.genz-floaters {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.genz-floaters span {
+  position: absolute;
+  font-size: 1.2rem;
+  opacity: 0.35;
+  animation: genz-float 4s ease-in-out infinite;
+}
+
+.genz-floaters span:nth-child(1) { top: 8%; left: 6%; animation-delay: 0s; }
+.genz-floaters span:nth-child(2) { top: 20%; right: 10%; animation-delay: 1s; }
+.genz-floaters span:nth-child(3) { bottom: 25%; left: 12%; animation-delay: 2s; }
+.genz-floaters span:nth-child(4) { bottom: 10%; right: 18%; animation-delay: 0.5s; }
+
+.genz-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+}
+
+.genz-menu-panel {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+}
+
+.genz-category {
+  animation: genz-pop-in 0.5s ease backwards;
+}
+
+.genz-category h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  border-left-width: 5px !important;
+}
+
+.cat-emoji {
+  font-size: 1.3rem;
+}
+
+.genz-food-grid {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+  gap: 1rem !important;
+}
+
+.genz-food-item {
+  animation: genz-pop-in 0.45s ease backwards;
+}
+
+/* Food sticker card */
+.food-card {
+  position: relative;
+  width: 100%;
+  border: none;
+  background: white;
+  border-radius: 28px;
+  padding: 0.75rem 0.75rem 1rem;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(255, 143, 171, 0.15);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
+  overflow: hidden;
+}
+
+.food-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  border: 3px solid var(--accent, #FF8FAB);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.food-card:hover:not(:disabled) {
+  transform: translateY(-6px) rotate(-2deg) scale(1.03);
+  box-shadow: 0 16px 32px rgba(255, 143, 171, 0.25);
+}
+
+.food-card:hover:not(:disabled)::after {
+  opacity: 1;
+}
+
+.food-card-bump {
+  animation: genz-bump 0.42s ease;
+}
+
+.food-card-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+}
+
+.food-card-glow {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent, #FF8FAB) 0%, transparent 70%);
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.food-card-img-wrap {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.food-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.08));
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.food-card:hover:not(:disabled) .food-card-img {
+  transform: scale(1.08) rotate(3deg);
+}
+
+.food-card-meta {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.food-card-price {
+  font-weight: 800;
+  font-size: 1rem;
+  color: #3D405B;
+  background: linear-gradient(135deg, #fff0f6, #ffe0ec);
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+}
+
+.food-card-tax {
+  font-size: 0.65rem;
+  color: #8a8494;
+}
+
+.food-card-add {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent, #FF8FAB);
+  letter-spacing: 0.03em;
+}
+
+/* Cart */
+.genz-cart {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(255, 143, 171, 0.2);
+  position: sticky;
+  top: 1rem;
+}
+
+.genz-cart.cart-pulse {
+  animation: genz-pulse-ring 0.5s ease;
+}
+
+.cart-emoji {
+  font-size: 1.1rem;
+}
+
+.genz-cart-list li {
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cart-food-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: #fff9fc;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.cart-item-qty {
+  flex: 1;
+  font-weight: 700;
+  color: #3D405B;
+}
+
+.cart-item-price {
+  font-weight: 800;
+  color: #FF8FAB;
+}
+
+.genz-total strong {
+  font-size: 1.35rem;
+  background: linear-gradient(135deg, #FF8FAB, #FFB347);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.genz-pill {
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2) !important;
+  color: #e65100 !important;
+}
+
+.genz-btn-primary {
+  background: linear-gradient(135deg, #FF8FAB, #FFB347, #A8E6CF) !important;
+  background-size: 200% 200% !important;
+  animation: genz-shimmer 4s ease infinite !important;
+  border: none !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em;
+}
+
+.genz-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.genz-input {
+  border: 2px solid #ffe0ec !important;
+  background: #fff9fc !important;
+}
+
+.genz-toast {
+  animation: genz-pop-in 0.4s ease;
+  font-weight: 600;
+}
+
+.genz-empty-cart {
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.genz-qty button {
+  background: linear-gradient(135deg, #fff0f6, #ffe0ec) !important;
+  border-color: #ffb3c6 !important;
+  font-weight: 700;
+  transition: transform 0.15s;
+}
+
+.genz-qty button:hover {
+  transform: scale(1.1);
+}
+
+.genz-loading {
+  text-align: center;
+  font-size: 1.1rem;
+  animation: genz-float 2s ease-in-out infinite;
+}
+
+/* Floor plan gen z */
+.genz-floor-page .table-card {
+  border-radius: 24px;
+  border-width: 3px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+}
+
+.genz-floor-page .table-card:hover {
+  transform: translateY(-8px) scale(1.04) rotate(-1deg);
+  box-shadow: 0 12px 28px rgba(255, 143, 171, 0.2);
+}
+
+.genz-floor-page .table-free {
+  background: linear-gradient(145deg, #f0fff8, #ffffff);
+  border-color: #A8E6CF;
+}
+
+.genz-floor-page .table-occupied {
+  background: linear-gradient(145deg, #fff8e1, #ffffff);
+  border-color: #FFB347;
+}
+
+.table-emoji {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.genz-kitchen-grid .genz-kitchen-card {
+  animation: genz-pop-in 0.45s ease backwards;
+}
+
+.genz-kitchen-items li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.genz-kitchen-empty {
+  background: linear-gradient(135deg, #f0fff8, #fff9fc) !important;
+  font-size: 1.1rem;
+  font-weight: 600;
+}

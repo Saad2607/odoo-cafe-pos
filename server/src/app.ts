@@ -10,6 +10,9 @@ import floorRoutes from './routes/floors.js';
 import orderRoutes from './routes/orders.js';
 import kitchenRoutes from './routes/kitchen.js';
 import couponRoutes from './routes/coupons.js';
+import paymentSettingsRoutes from './routes/paymentSettings.js';
+import customerRoutes from './routes/customers.js';
+import categoryRoutes from './routes/categories.js';
 
 const app = express();
 
@@ -20,7 +23,7 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     stack: 'MERN',
-    phase: 'Phase 3 - Admin, Coupons & Session Close',
+    phase: 'Phase 4 - Payments, Orders, Customers & Categories',
     database: 'MongoDB',
     backend: 'Express + Node.js',
     frontend: 'React (port 5173)',
@@ -34,5 +37,8 @@ app.use('/api/floors', floorRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/kitchen', kitchenRoutes);
 app.use('/api/coupons', couponRoutes);
+app.use('/api/payment-settings', paymentSettingsRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/categories', categoryRoutes);
 
 export default app;

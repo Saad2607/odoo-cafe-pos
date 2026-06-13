@@ -1,6 +1,6 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
-import TerminalLayout from '../components/TerminalLayout';
+import AppLayout from '../components/AppLayout';
 import {
   createProduct,
   deleteProduct,
@@ -47,7 +47,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => { load(); }, []);
 
-  if (!user || user.role !== 'ADMIN') return <Navigate to="/terminal" replace />;
+  if (!user || user.role !== 'ADMIN') return <Navigate to="/dashboard" replace />;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -102,7 +102,7 @@ export default function AdminProductsPage() {
   }
 
   return (
-    <TerminalLayout title="Admin" subtitle="Product management">
+    <AppLayout title="Menu Admin" subtitle="Manage breakfast items">
       <div className="pos-page admin-page">
         {loading && <p className="pos-muted">Loading…</p>}
         {error && <div className="pos-error">{error}</div>}
@@ -158,6 +158,6 @@ export default function AdminProductsPage() {
           </div>
         </div>
       </div>
-    </TerminalLayout>
+    </AppLayout>
   );
 }

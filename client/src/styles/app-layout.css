@@ -1,0 +1,120 @@
+/* App shell — cafe breakfast aesthetic */
+
+.app-shell {
+  min-height: 100vh;
+  background: #F5F0E8;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  background: #FDFBF7;
+  border-bottom: 1px solid #E8DFD4;
+  color: #2C2C2C;
+  padding: 0.85rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-brand-logo {
+  border-radius: 10px;
+}
+
+.app-brand h1 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #9E4B3A;
+  letter-spacing: 0.02em;
+}
+
+.app-brand span {
+  font-size: 0.72rem;
+  color: #7A7268;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.app-nav {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.app-nav-link {
+  color: #5C534A;
+  text-decoration: none;
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.app-nav-link:hover,
+.app-nav-link.active {
+  background: #9E4B3A;
+  color: #FDFBF7;
+}
+
+.app-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-user-info { text-align: right; }
+
+.app-user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #2C2C2C;
+}
+
+.app-user-role {
+  font-size: 0.7rem;
+  color: #7A7268;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.app-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #9E4B3A;
+  color: #FDFBF7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.app-logout {
+  padding: 0.45rem 1rem;
+  border: 1px solid #D4C9BC;
+  border-radius: 6px;
+  background: transparent;
+  color: #5C534A;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.app-logout:hover {
+  border-color: #9E4B3A;
+  color: #9E4B3A;
+}
+
+.app-main { flex: 1; }

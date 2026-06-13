@@ -1,0 +1,117 @@
+.customers-page {
+  padding: 1.5rem 2rem 2.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.customers-toolbar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.customers-search {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 240px;
+}
+
+.customers-search .pill-input {
+  flex: 1;
+}
+
+.customers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.customer-card {
+  background: #fffaf7;
+  border: 1px solid #e8ddd4;
+  border-radius: 16px;
+  padding: 1.25rem;
+}
+
+.customer-card h4 {
+  margin: 0 0 0.5rem;
+}
+
+.customer-card p {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+  color: #6b4e71;
+}
+
+.customer-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 20, 25, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.customer-form {
+  background: #fffaf7;
+  border-radius: 20px;
+  padding: 1.5rem;
+  width: min(400px, 90%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.customer-form h3 {
+  margin: 0 0 0.5rem;
+}
+
+.customer-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.customer-picker {
+  background: #fffaf7;
+  border: 1px solid #e8ddd4;
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.customer-pick-btn {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: #f5ebe3;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.customer-pick-btn:hover {
+  background: #ede0d4;
+}
+
+.order-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.order-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.promo-line {
+  color: #2e7d32 !important;
+}

@@ -1,0 +1,142 @@
+/* Coffee reference background — cinematic loop + steam canvas */
+
+@keyframes auth-coffee-kenburns {
+  0% {
+    transform: scale(1.05) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.12) translate(-1.5%, -1%);
+  }
+  100% {
+    transform: scale(1.05) translate(0, 0);
+  }
+}
+
+@keyframes auth-shine-drift {
+  0%, 100% { opacity: 0.35; transform: translateX(-5%); }
+  50% { opacity: 0.55; transform: translateX(5%); }
+}
+
+.auth-coffee-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #2a1810;
+}
+
+.auth-coffee-image {
+  position: absolute;
+  inset: -6%;
+  background-image: url('/auth/coffee-bg.jpg');
+  background-size: cover;
+  background-position: center 42%;
+  animation: auth-coffee-kenburns 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+.auth-coffee-steam-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.auth-coffee-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 248, 240, 0.08) 48%,
+    transparent 65%
+  );
+  animation: auth-shine-drift 14s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.auth-coffee-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(20, 12, 8, 0.55) 0%, rgba(20, 12, 8, 0.2) 45%, rgba(20, 12, 8, 0.65) 100%),
+    linear-gradient(180deg, rgba(20, 12, 8, 0.15) 0%, rgba(20, 12, 8, 0.45) 100%);
+  pointer-events: none;
+}
+
+.auth-page--coffee {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  overflow: hidden;
+}
+
+.auth-page--coffee .auth-layout {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 980px;
+}
+
+.auth-page--coffee .auth-hero-badge {
+  display: none;
+}
+
+.auth-page--coffee .auth-hero {
+  color: #FDFBF7;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
+}
+
+.auth-page--coffee .auth-hero-kicker {
+  color: rgba(253, 251, 247, 0.85);
+}
+
+.auth-page--coffee .auth-hero-title {
+  color: #FDFBF7;
+}
+
+.auth-page--coffee .auth-hero-hours {
+  color: rgba(253, 251, 247, 0.92);
+}
+
+.auth-page--coffee .auth-hero-tagline {
+  color: rgba(253, 251, 247, 0.8);
+}
+
+.auth-page--coffee .auth-hero-badge {
+  border-color: rgba(253, 251, 247, 0.35);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.auth-page--coffee .auth-card {
+  background: rgba(253, 251, 247, 0.92);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
+}
+
+@media (max-width: 768px) {
+  .auth-coffee-image {
+    background-position: 35% center;
+  }
+
+  .auth-coffee-vignette {
+    background:
+      linear-gradient(180deg, rgba(20, 12, 8, 0.35) 0%, rgba(20, 12, 8, 0.7) 100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-coffee-image,
+  .auth-coffee-shine {
+    animation: none;
+  }
+
+  .auth-coffee-steam-canvas {
+    display: none;
+  }
+}
