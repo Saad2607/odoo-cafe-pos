@@ -60,12 +60,14 @@ export interface Floor {
 }
 
 export interface OrderItem {
+  id?: string;
   productId: string;
   productName: string;
   quantity: number;
   unitPrice: number;
   lineTotal: number;
   discount: number;
+  kitchenDone?: boolean;
 }
 
 export interface Order {
@@ -341,8 +343,134 @@ export async function fetchCategories() {
   return apiFetch<{ categories: Category[] }>('/products/categories');
 }
 
-export async function fetchKitchenQueue() {
-  return apiFetch<{ orders: Order[] }>('/kitchen');
+export async function fetchAllCategories() {
+  return apiFetch<{ categories: Category[] }>('/categories');
+}
+
+export async function fetchUsers() {
+  return apiFetch<{ users: User[] }>('/users');
+}
+
+export async function createUser(data: { name: string; email: string; password: string; role: User['role'] }) {
+  return apiFetch<{ user: User }>('/users', { method: 'POST', body: JSON.stringify(data) });
+}
+
+export async function changeUserPassword(id: string, password: string) {
+  return apiFetch<{ user: User }>(`/users/${id}/password`, {
+    method: 'PATCH',
+    body: JSON.stringify({ password }),
+  });
+}
+
+export async function archiveUser(id: string) {
+  return apiFetch<{ user: User }>(`/users/${id}/archive`, { method: 'PATCH' });
+}
+
+export async function restoreUser(id: string) {
+  return apiFetch<{ user: User }>(`/users/${id}/restore`, { method: 'PATCH' });
+}
+
+export async function deleteUser(id: string) {
+  return apiFetch<{ message: string }>(`/users/${id}`, { method: 'DELETE' });
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  discountType: 'PERCENTAGE' | 'FIXED';
+  discountValue: number;
+  isActive: boolean;
+}
+
+export interface Promotion {
+  id: string;
+  name: string;
+  triggerType: 'PRODUCT' | 'ORDER';
+  minQuantity: number | null;
+  minOrderAmount: number | null;
+  discountType: 'PERCENTAGE' | 'FIXED';
+  discountValue: number;
+  productId: string | null;
+  productName: string | null;
+  isActive: boolean;
+}
+
+export async function fetchAdminCoupons() {
+  return apiFetch<{ coupons: Coupon[] }>('/discounts/coupons');
+}
+
+export async function createCoupon(data: Omit<Coupon, 'id'>) {
+  return apiFetch<{ coupon: Coupon }>('/discounts/coupons', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateCoupon(id: string, data: Partial<Omit<Coupon, 'id'>>) {
+  return apiFetch<{ coupon: Coupon }>(`/discounts/coupons/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteCoupon(id: string) {
+  return apiFetch<{ message: string }>(`/discounts/coupons/${id}`, { method: 'DELETE' });
+}
+
+export async function fetchAdminPromotions() {
+  return apiFetch<{ promotions: Promotion[] }>('/discounts/promotions');
+}
+
+export async function createPromotion(data: Record<string, unknown>) {
+  return apiFetch<{ promotion: Promotion }>('/discounts/promotions', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deletePromotion(id: string) {
+  return apiFetch<{ message: string }>(`/discounts/promotions/${id}`, { method: 'DELETE' });
+}
+
+export interface ReportData {
+  metrics: { totalOrders: number; revenue: number; avgOrderValue: number };
+  salesTrend: Array<{ date: string; revenue: number; orders: number }>;
+  topProducts: Array<{ name: string; qty: number; revenue: number }>;
+  topCategories: Array<{ name: string; revenue: number }>;
+  topOrders: Array<{ orderNumber: string; date: string; amount: number }>;
+  filters: {
+    employees: Array<{ id: string; name: string }>;
+    sessions: Array<{ id: string; sessionNumber: string; openedAt: string }>;
+  };
+}
+
+export async function fetchReports(params?: {
+  period?: string;
+  employeeId?: string;
+  sessionId?: string;
+}) {
+  const q = new URLSearchParams();
+  if (params?.period) q.set('period', params.period);
+  if (params?.employeeId) q.set('employeeId', params.employeeId);
+  if (params?.sessionId) q.set('sessionId', params.sessionId);
+  const query = q.toString() ? `?${q}` : '';
+  return apiFetch<ReportData>(`/reports${query}`);
+}
+
+export async function updateDraftOrder(orderId: string, items: { productId: string; quantity: number }[]) {
+  return apiFetch<{ order: Order }>(`/orders/${orderId}/items`, {
+    method: 'PATCH',
+    body: JSON.stringify({ items }),
+  });
+}
+
+export async function toggleKitchenItem(orderId: string, itemId: string) {
+  return apiFetch<{ order: Order }>(`/kitchen/${orderId}/items/${itemId}/done`, { method: 'PATCH' });
+}
+
+export async function fetchKitchenQueue(q?: string) {
+  const query = q ? `?q=${encodeURIComponent(q)}` : '';
+  return apiFetch<{ orders: Order[] }>(`/kitchen${query}`);
 }
 
 export async function updateKitchenStatus(orderId: string, kitchenStatus: Order['kitchenStatus']) {
@@ -418,8 +546,4 @@ export async function updateCategory(id: string, data: Partial<{ name: string; c
 
 export async function deleteCategory(id: string) {
   return apiFetch<{ message: string }>(`/categories/${id}`, { method: 'DELETE' });
-}
-
-export async function fetchAllCategories() {
-  return apiFetch<{ categories: Category[] }>('/categories');
 }

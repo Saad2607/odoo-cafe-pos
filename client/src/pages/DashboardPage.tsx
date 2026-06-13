@@ -109,14 +109,32 @@ export default function DashboardPage() {
               </Link>
             ))}
             {user?.role === 'ADMIN' && (
-              <Link to="/admin/products" className="dash-action-card">
-                <span className="dash-action-icon">⚙️</span>
-                <div>
-                  <h3>Manage Menu</h3>
-                  <p>Add or edit breakfast items</p>
-                </div>
-                <span className="dash-action-arrow">→</span>
-              </Link>
+              <>
+                <Link to="/admin/products" className="dash-action-card">
+                  <span className="dash-action-icon">⚙️</span>
+                  <div>
+                    <h3>Manage Menu</h3>
+                    <p>Add or edit breakfast items</p>
+                  </div>
+                  <span className="dash-action-arrow">→</span>
+                </Link>
+                <Link to="/reports" className="dash-action-card">
+                  <span className="dash-action-icon">📊</span>
+                  <div>
+                    <h3>Reports</h3>
+                    <p>Sales analytics & exports</p>
+                  </div>
+                  <span className="dash-action-arrow">→</span>
+                </Link>
+                <Link to="/admin/users" className="dash-action-card">
+                  <span className="dash-action-icon">👥</span>
+                  <div>
+                    <h3>Manage Users</h3>
+                    <p>Employees & admins</p>
+                  </div>
+                  <span className="dash-action-arrow">→</span>
+                </Link>
+              </>
             )}
           </div>
         </section>

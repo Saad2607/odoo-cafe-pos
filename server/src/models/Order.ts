@@ -13,6 +13,7 @@ export interface IOrderItem {
   unitPrice: number;
   lineTotal: number;
   discount: number;
+  kitchenDone?: boolean;
 }
 
 export interface IOrder extends Document {
@@ -47,6 +48,7 @@ const orderItemSchema = new Schema<IOrderItem>(
     unitPrice: { type: Number, required: true },
     lineTotal: { type: Number, required: true },
     discount: { type: Number, default: 0 },
+    kitchenDone: { type: Boolean, default: false },
   },
   { _id: true },
 );

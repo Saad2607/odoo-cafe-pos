@@ -8,7 +8,7 @@ import { Order } from '../models/Order.js';
 
 import { getPaymentSettings } from '../models/PaymentSettings.js';
 
-import { createOrder, formatOrder } from '../services/order.js';
+import { createOrder, formatOrder, updateDraftOrder } from '../services/order.js';
 
 import { calculateDiscount, validateCoupon } from '../services/coupon.js';
 
@@ -247,6 +247,26 @@ router.patch('/:id/customer', authenticate, async (req, res) => {
 });
 
 
+
+router.patch('/:id/items', authenticate, async (req, res) => {
+  try {
+    const data = z.object({
+      items: z.array(z.object({
+        productId: z.string().min(1),
+        quantity: z.number().int().min(1),
+      })).min(1),
+    }).parse(req.body);
+
+    const order = await updateDraftOrder(String(req.params.id), data.items);
+    await order.populate('tableId', 'tableNumber');
+    await order.populate('customerId', 'name email phone');
+    return res.json({ order: formatOrder(order) });
+  } catch (err) {
+    if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors[0].message });
+    if (err instanceof Error) return res.status(400).json({ error: err.message });
+    return res.status(500).json({ error: 'Failed to update order' });
+  }
+});
 
 router.delete('/:id', authenticate, async (req, res) => {
 

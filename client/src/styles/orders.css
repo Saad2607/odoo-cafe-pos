@@ -82,3 +82,52 @@
   color: #c62828 !important;
   border-color: #ffcdd2 !important;
 }
+
+.order-detail-page .cafe-back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #9e4b3a;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.order-detail-totals {
+  font-size: 0.9rem;
+  color: #5c534a;
+  margin: 0.75rem 0;
+}
+
+.order-detail-totals p {
+  margin: 0.2rem 0;
+}
+
+.order-edit-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.order-edit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0ebe3;
+}
+
+.order-edit-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.order-edit-qty button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #e8ddd4;
+  background: white;
+  cursor: pointer;
+  font-size: 1rem;
+}

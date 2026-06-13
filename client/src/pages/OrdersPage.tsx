@@ -93,6 +93,9 @@ export default function OrdersPage() {
               </ul>
 
               <div className="order-card-actions">
+                <Link to={`/orders/${order.id}`} className="terminal-btn cafe-btn-outline">
+                  View Details
+                </Link>
                 {order.status === 'DRAFT' && order.table && (
                   <Link to={`/order/${order.table.id}`} className="terminal-btn cafe-btn-outline">
                     Edit / Pay

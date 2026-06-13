@@ -7,6 +7,7 @@ import AppLayout from '../components/AppLayout';
 import FoodCard from '../components/FoodCard';
 
 import PaymentModal from '../components/PaymentModal';
+import ReceiptPrint from '../components/ReceiptPrint';
 
 import { getFoodImage } from '../lib/foodImages';
 
@@ -83,6 +84,7 @@ export default function OrderPage() {
   const [search, setSearch] = useState('');
 
   const [showPayment, setShowPayment] = useState(false);
+  const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
 
   const [customerSearch, setCustomerSearch] = useState('');
 
@@ -340,9 +342,9 @@ export default function OrderPage() {
 
     setExistingOrder(order);
 
-    setMessage(receiptMsg || 'Payment complete.');
+    setReceiptOrder(order);
 
-    setTimeout(() => navigate('/floor'), 1500);
+    setMessage(receiptMsg || 'Payment complete.');
 
   }
 
@@ -674,6 +676,16 @@ export default function OrderPage() {
 
           />
 
+        )}
+
+        {receiptOrder && (
+          <ReceiptPrint
+            order={receiptOrder}
+            onClose={() => {
+              setReceiptOrder(null);
+              navigate('/floor');
+            }}
+          />
         )}
 
       </div>

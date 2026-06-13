@@ -13,6 +13,9 @@ import couponRoutes from './routes/coupons.js';
 import paymentSettingsRoutes from './routes/paymentSettings.js';
 import customerRoutes from './routes/customers.js';
 import categoryRoutes from './routes/categories.js';
+import userRoutes from './routes/users.js';
+import discountRoutes from './routes/discounts.js';
+import reportRoutes from './routes/reports.js';
 
 const app = express();
 
@@ -23,7 +26,7 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     stack: 'MERN',
-    phase: 'Phase 4 - Payments, Orders, Customers & Categories',
+    phase: 'Phase 5 - Users, Reports, Discounts & Kitchen Items',
     database: 'MongoDB',
     backend: 'Express + Node.js',
     frontend: 'React (port 5173)',
@@ -40,5 +43,8 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/payment-settings', paymentSettingsRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/discounts', discountRoutes);
+app.use('/api/reports', reportRoutes);
 
 export default app;
