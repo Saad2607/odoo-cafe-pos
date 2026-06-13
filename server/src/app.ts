@@ -17,6 +17,9 @@ import userRoutes from './routes/users.js';
 import discountRoutes from './routes/discounts.js';
 import reportRoutes from './routes/reports.js';
 import bookingRoutes from './routes/bookings.js';
+import liveRoutes from './routes/live.js';
+import receiptRoutes from './routes/receipt.js';
+import comboRoutes from './routes/combos.js';
 
 const app = express();
 
@@ -48,5 +51,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/discounts', discountRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/live', liveRoutes);
+app.use('/api/receipt', receiptRoutes);
+app.use('/api/combos', comboRoutes);
 
 export default app;

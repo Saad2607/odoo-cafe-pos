@@ -36,6 +36,7 @@ export interface IOrder extends Document {
   sessionId: Types.ObjectId;
   employeeId: Types.ObjectId;
   items: IOrderItem[];
+  receiptToken?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -78,6 +79,7 @@ const orderSchema = new Schema<IOrder>(
     sessionId: { type: Schema.Types.ObjectId, ref: 'PosSession', required: true },
     employeeId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     items: [orderItemSchema],
+    receiptToken: { type: String, index: true },
   },
   { timestamps: true },
 );

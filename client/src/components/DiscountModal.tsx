@@ -17,8 +17,15 @@ export default function DiscountModal({ couponCode, onApply, onClose }: Discount
   }
 
   return (
-    <div className="payment-overlay" onClick={onClose}>
-      <form className="payment-modal discount-modal" onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit}>
+    <div
+      className="payment-overlay"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <form
+        className="payment-modal discount-modal"
+        onMouseDown={(e) => e.stopPropagation()}
+        onSubmit={handleSubmit}
+      >
         <header className="payment-header">
           <h3>Apply Coupon</h3>
           <button type="button" className="payment-close" onClick={onClose}>×</button>

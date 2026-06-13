@@ -88,12 +88,25 @@
 
 .receipt-actions {
   display: flex;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-top: 1.25rem;
 }
 
 .receipt-actions button {
-  flex: 1;
+  flex: none;
+  width: 100%;
+}
+
+.receipt-success-banner {
+  text-align: center;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
 }
 
 @media print {

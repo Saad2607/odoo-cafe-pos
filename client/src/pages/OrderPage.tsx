@@ -10,6 +10,8 @@ import PaymentModal from '../components/PaymentModal';
 import ReceiptPrint from '../components/ReceiptPrint';
 import DiscountModal from '../components/DiscountModal';
 import ReceiptEmailModal from '../components/ReceiptEmailModal';
+import SmartPairingToast from '../components/SmartPairingToast';
+import ConfettiBurst from '../components/ConfettiBurst';
 
 import { getFoodImage } from '../lib/foodImages';
 
@@ -31,8 +33,9 @@ import {
 
   validateCoupon,
 
+  fetchCombos,
   Product,
-
+  ComboMeal,
   Order,
 
   Customer,
@@ -42,6 +45,7 @@ import {
 import '../styles/pos.css';
 
 import '../styles/cafe-menu.css';
+import '../styles/menu-explorer.css';
 
 
 
@@ -99,6 +103,10 @@ export default function OrderPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   const [showCustomerPicker, setShowCustomerPicker] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [pairingProduct, setPairingProduct] = useState<Product | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [combos, setCombos] = useState<ComboMeal[]>([]);
 
 
 
@@ -106,11 +114,12 @@ export default function OrderPage() {
 
     if (!tableId) return;
 
-    Promise.all([fetchProducts(), fetchTableOrder(tableId)])
+    Promise.all([fetchProducts(), fetchTableOrder(tableId), fetchCombos()])
 
-      .then(([productRes, orderRes]) => {
+      .then(([productRes, orderRes, comboRes]) => {
 
         setProducts(productRes.products);
+        setCombos(comboRes.combos);
 
         setExistingOrder(orderRes.order);
 
@@ -175,13 +184,27 @@ export default function OrderPage() {
 
 
 
-  const total = cart.reduce((sum, line) => {
+  const cartSubtotal = useMemo(() =>
+    cart.reduce((s, line) => s + line.product.price * line.quantity, 0),
+  [cart]);
 
-    const lineTotal = line.product.price * line.quantity;
+  const cartTax = useMemo(() =>
+    cart.reduce((s, line) => {
+      const lineTotal = line.product.price * line.quantity;
+      return s + lineTotal * (line.product.tax / 100);
+    }, 0),
+  [cart]);
 
-    return sum + lineTotal + lineTotal * (line.product.tax / 100);
+  const total = cartSubtotal + cartTax;
 
-  }, 0);
+  const summarySubtotal = existingOrder?.subtotal ?? cartSubtotal;
+  const summaryTax = existingOrder?.taxAmount ?? cartTax;
+  const summaryDiscount = couponDiscount ?? existingOrder?.discount ?? 0;
+  const summaryTotal = existingOrder
+    ? (couponDiscount != null
+      ? summarySubtotal + summaryTax - couponDiscount
+      : existingOrder.amount)
+    : total;
 
 
 
@@ -200,6 +223,50 @@ export default function OrderPage() {
       return [...prev, { product, quantity: 1 }];
 
     });
+
+    setPairingProduct(product);
+
+  }
+
+
+
+  function addComboToCart(combo: ComboMeal) {
+
+    if (existingOrder?.status === 'PAID') return;
+
+    setCart((prev) => {
+
+      const next = [...prev];
+
+      for (const item of combo.items) {
+
+        const product = products.find((p) => p.id === item.productId);
+
+        if (!product) continue;
+
+        const existing = next.find((l) => l.product.id === product.id);
+
+        if (existing) existing.quantity += item.quantity;
+
+        else next.push({ product, quantity: item.quantity });
+
+      }
+
+      return next;
+
+    });
+
+    setMessage(`${combo.name} added — save ₹${combo.savings}!`);
+
+  }
+
+
+
+  function getLineDiscount(productId: string): number {
+
+    const item = existingOrder?.items.find((i) => i.productId === productId);
+
+    return item?.discount ?? 0;
 
   }
 
@@ -367,6 +434,8 @@ export default function OrderPage() {
 
     setReceiptOrder(order);
 
+    setShowConfetti(true);
+
     setMessage(receiptMsg || 'Payment complete.');
 
   }
@@ -375,7 +444,7 @@ export default function OrderPage() {
 
   return (
 
-    <AppLayout title="Breakfast Menu" subtitle="Savoury & Sweet">
+    <AppLayout title="Full Menu" subtitle={`${products.length} items · 18 categories`}>
 
       <div className="pos-page order-page cafe-order-page">
 
@@ -481,7 +550,55 @@ export default function OrderPage() {
 
             <section className="menu-panel cafe-menu-panel">
 
+              {combos.length > 0 && (
+                <div className="combo-deals-section">
+                  <h3>🎁 Combo Deals — bundle & save</h3>
+                  <div className="combo-cards">
+                    {combos.map((combo) => (
+                      <button
+                        key={combo.id}
+                        type="button"
+                        className="combo-card"
+                        disabled={existingOrder?.status === 'PAID'}
+                        onClick={() => addComboToCart(combo)}
+                      >
+                        <strong>{combo.name}</strong>
+                        <span className="combo-card-tagline">{combo.tagline}</span>
+                        <span className="combo-card-items">
+                          {combo.items.map((i) => i.productName).join(' · ')}
+                        </span>
+                        <span className="combo-card-price">₹{combo.price}</span>
+                        <span className="combo-card-save">Save ₹{combo.savings} ({combo.discountPercent}% off)</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="category-tabs">
+                <button
+                  type="button"
+                  className={`category-tab${activeCategory === 'all' ? ' active' : ''}`}
+                  onClick={() => setActiveCategory('all')}
+                >
+                  All
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    className={`category-tab${activeCategory === cat.id ? ' active' : ''}`}
+                    style={{ '--cat-color': cat.color } as React.CSSProperties}
+                    onClick={() => setActiveCategory(cat.id)}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+
               {categories.map((cat, ci) => {
+
+                if (activeCategory !== 'all' && cat.id !== activeCategory) return null;
 
                 const catProducts = filteredProducts.filter((p) => p.category?.id === cat.id);
 
@@ -511,8 +628,12 @@ export default function OrderPage() {
                           imageUrl={product.imageUrl}
 
                           accent={cat.color}
-
-                          vegetarian={VEG_ITEMS.has(product.name)}
+                          categoryName={cat.name}
+                          vegetarian={product.tags?.includes('VEG') ?? VEG_ITEMS.has(product.name)}
+                          badges={[
+                            product.isBestseller ? '⭐' : '',
+                            product.isNewArrival ? 'NEW' : '',
+                          ].filter(Boolean)}
 
                           disabled={existingOrder?.status === 'PAID'}
 
@@ -552,6 +673,8 @@ export default function OrderPage() {
 
                         <strong>{item.productName}</strong> ×{item.quantity}
 
+                        {item.discount > 0 && <span className="cart-line-promo"> −₹{item.discount} promo</span>}
+
                       </li>
 
                     ))}
@@ -559,6 +682,11 @@ export default function OrderPage() {
                   </ul>
 
                   <div className="cart-total cafe-total"><span>Total</span><strong>₹{existingOrder.amount.toFixed(0)}</strong></div>
+
+                  <button type="button" className="terminal-btn cafe-btn-outline cart-action-btn"
+                    onClick={() => setShowReceiptEmail(true)}>
+                    Send Receipt
+                  </button>
 
                 </>
 
@@ -588,6 +716,12 @@ export default function OrderPage() {
 
                           <strong>{line.product.name}</strong>
 
+                          {getLineDiscount(line.product.id) > 0 && (
+                            <span className="cart-line-promo">−₹{getLineDiscount(line.product.id)} promo</span>
+                          )}
+
+                          <span className="cart-unit-price">₹{line.product.price} each</span>
+
                           <div className="qty-controls">
 
                             <button type="button" onClick={() => changeQty(line.product.id, -1)}>−</button>
@@ -600,7 +734,7 @@ export default function OrderPage() {
 
                         </div>
 
-                        <span>₹{(line.product.price * line.quantity).toFixed(0)}</span>
+                        <span className="cart-line-total">₹{(line.product.price * line.quantity).toFixed(0)}</span>
 
                       </li>
 
@@ -612,24 +746,19 @@ export default function OrderPage() {
 
                     <>
 
-                      <div className="cart-total cafe-total">
-
-                        <span>Total</span>
-
-                        <strong>
-
-                          ₹{existingOrder
-
-                            ? (couponDiscount != null
-
-                              ? (existingOrder.subtotal + existingOrder.taxAmount - couponDiscount).toFixed(0)
-
-                              : existingOrder.amount.toFixed(0))
-
-                            : total.toFixed(0)}
-
-                        </strong>
-
+                      <div className="order-summary">
+                        <div className="order-summary-row"><span>Subtotal</span><span>₹{summarySubtotal.toFixed(0)}</span></div>
+                        <div className="order-summary-row"><span>Tax</span><span>₹{summaryTax.toFixed(0)}</span></div>
+                        {summaryDiscount > 0 && (
+                          <div className="order-summary-row order-summary-discount">
+                            <span>{existingOrder?.promotionName ? `Promo: ${existingOrder.promotionName}` : couponCode ? `Coupon: ${couponCode}` : 'Discount'}</span>
+                            <span>−₹{summaryDiscount.toFixed(0)}</span>
+                          </div>
+                        )}
+                        <div className="cart-total cafe-total order-summary-total">
+                          <span>Total</span>
+                          <strong>₹{summaryTotal.toFixed(0)}</strong>
+                        </div>
                       </div>
 
                       {existingOrder && (
@@ -637,18 +766,6 @@ export default function OrderPage() {
                           onClick={() => setShowDiscount(true)}>
                           Discount / Coupon
                         </button>
-                      )}
-
-                      {existingOrder && (
-
-                        <button type="button" className="terminal-btn cafe-btn-outline cart-action-btn"
-
-                          onClick={() => setShowReceiptEmail(true)}>
-
-                          Send Receipt
-
-                        </button>
-
                       )}
 
                       {!existingOrder && (
@@ -718,7 +835,12 @@ export default function OrderPage() {
         {receiptOrder && (
           <ReceiptPrint
             order={receiptOrder}
-            onClose={() => {
+            onClose={() => setReceiptOrder(null)}
+            onSendReceipt={() => {
+              setReceiptOrder(null);
+              setShowReceiptEmail(true);
+            }}
+            onBackToFloor={() => {
               setReceiptOrder(null);
               navigate('/floor');
             }}
@@ -740,6 +862,15 @@ export default function OrderPage() {
             onClose={() => setShowReceiptEmail(false)}
           />
         )}
+
+        <SmartPairingToast
+          product={pairingProduct}
+          allProducts={products}
+          onAdd={addToCart}
+          onDismiss={() => setPairingProduct(null)}
+        />
+
+        <ConfettiBurst active={showConfetti} />
 
       </div>
 

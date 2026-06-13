@@ -12,6 +12,10 @@ export interface IProduct extends Document {
   imageUrl?: string;
   sendToKitchen: boolean;
   isActive: boolean;
+  tags: string[];
+  isBestseller: boolean;
+  isNewArrival: boolean;
+  spiceLevel: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +31,10 @@ const schema = new Schema<IProduct>(
     imageUrl: { type: String },
     sendToKitchen: { type: Boolean, default: true },
     isActive: { type: Boolean, default: true },
+    tags: { type: [String], default: [] },
+    isBestseller: { type: Boolean, default: false },
+    isNewArrival: { type: Boolean, default: false },
+    spiceLevel: { type: Number, default: 0, min: 0, max: 3 },
   },
   { timestamps: true },
 );

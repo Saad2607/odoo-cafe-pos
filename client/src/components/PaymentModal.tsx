@@ -65,8 +65,13 @@ export default function PaymentModal({
         cardReference: method === 'CARD' ? cardReference.trim() : undefined,
       });
       const receiptMsg = res.receipt?.emailed
-        ? `Receipt emailed to ${res.receipt.to}`
-        : undefined;
+        ? `Receipt emailed to ${res.receipt.to}${res.receipt.viewUrl ? '' : ''}`
+        : res.receipt?.viewUrl
+          ? `Payment complete. Customer receipt: ${res.receipt.viewUrl}`
+          : undefined;
+      if (res.receipt?.viewUrl && res.receipt.emailed) {
+        window.open(res.receipt.viewUrl, '_blank', 'noopener');
+      }
       onSuccess(res.order, receiptMsg);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment failed');

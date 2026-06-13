@@ -12,7 +12,8 @@ import { createOrder, formatOrder, updateDraftOrder } from '../services/order.js
 
 import { calculateDiscount, validateCoupon } from '../services/coupon.js';
 
-import { sendReceiptEmail } from '../services/receipt.js';
+import { sendReceiptEmail, ensureReceiptToken } from '../services/receipt.js';
+import { env } from '../config/env.js';
 import { applyPromotions } from '../services/promotion.js';
 
 
@@ -443,19 +444,29 @@ router.patch('/:id/pay', authenticate, async (req, res) => {
 
 
 
-    const formatted = formatOrder(order);
+    const token = ensureReceiptToken(order);
+    await order.save();
 
-    let receiptResult = { emailed: false as boolean, to: undefined as string | undefined };
+    const formatted = formatOrder(order);
+    const viewUrl = `${env.clientUrl}/receipt/${token}`;
+
+    let receiptResult: {
+      emailed: boolean;
+      to?: string;
+      viewUrl: string;
+      emailSent: boolean;
+    } = { emailed: false, viewUrl, emailSent: false };
+
     const emailTo = formatted.customer?.email;
     if (emailTo) {
-      await sendReceiptEmail(order, emailTo);
-      receiptResult = { emailed: true, to: emailTo };
+      const result = await sendReceiptEmail(order, emailTo);
+      receiptResult = { emailed: true, to: emailTo, viewUrl: result.viewUrl, emailSent: result.emailSent };
     }
 
     return res.json({
       message: 'Payment successful',
       order: formatted,
-      receipt: receiptResult,
+      receipt: { ...receiptResult, viewUrl: receiptResult.viewUrl },
     });
 
   } catch (err) {
@@ -487,9 +498,22 @@ router.post('/:id/send-receipt', authenticate, async (req, res) => {
     if (!order) return res.status(404).json({ error: 'Order not found' });
 
     const result = await sendReceiptEmail(order, data.email);
-    return res.json({ message: 'Receipt sent', sent: result.sent, preview: result.preview });
+    return res.json({
+      message: result.emailSent
+        ? `Receipt emailed to ${result.recipient}`
+        : result.emailError
+          ? `Receipt link ready. Email not sent: ${result.emailError}`
+          : 'Receipt link created for customer',
+      sent: result.sent,
+      emailSent: result.emailSent,
+      viewUrl: result.viewUrl,
+      recipient: result.recipient,
+      preview: result.preview,
+      emailError: result.emailError ?? null,
+    });
   } catch (err) {
     if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors[0].message });
+    if (err instanceof Error) return res.status(400).json({ error: err.message });
     return res.status(500).json({ error: 'Failed to send receipt' });
   }
 });

@@ -1,31 +1,14 @@
-// Real breakfast menu — savoury & sweet (prices from cafe menu)
-
 import { fileURLToPath } from 'node:url';
 import bcrypt from 'bcryptjs';
 import { connectDB, disconnectDB } from '../config/db.js';
 import {
   User, ProductCategory, Product, Floor,
-  RestaurantTable, Coupon, Promotion, Customer,
+  RestaurantTable, Coupon, Promotion, Customer, ComboMeal,
 } from '../models/index.js';
+import { generateCatalogProducts, getCatalogStats } from './menuCatalog.js';
+import { refreshAllProductImages } from './refreshImages.js';
 
-const MENU = [
-  // SAVOURY
-  { name: 'Pesto Eggs on Toast', image: '/foods/pesto-eggs-toast.jpg', price: 372, cat: 'Savoury', color: '#9E4B3A', desc: 'Smashed avocado, feta, marinated tomatoes, basil pesto, sourdough', veg: true },
-  { name: 'Eggs Kejriwal', image: '/foods/eggs-kejriwal.jpg', price: 372, cat: 'Savoury', color: '#9E4B3A', desc: 'Cheese chilli toast, thecha babka, coconut avocado chutney, fried eggs' },
-  { name: 'Miso Scrambled Eggs', image: '/foods/miso-scrambled-eggs.jpg', price: 321, cat: 'Savoury', color: '#9E4B3A', desc: 'White miso scrambled eggs, furikake, pickled shallots, sourdough' },
-  { name: 'Khao Soi Eggs Benedict', image: '/foods/khao-soi-benedict.jpg', price: 392, cat: 'Savoury', color: '#9E4B3A', desc: 'Crispy noodles, soft poached eggs, curry hollandaise' },
-  { name: 'Akuri Style Bhurji', image: '/foods/akuri-bhurji.jpg', price: 321, cat: 'Savoury', color: '#9E4B3A', desc: 'Spicy Parsi scrambled eggs, crispy onions, green chutney, cheddar' },
-  { name: 'Big Brekkie', image: '/foods/big-brekkie.jpg', price: 393, cat: 'Savoury', color: '#9E4B3A', desc: 'Chicken sausages, avocado, grilled tomato, beans, watermelons, choice of eggs' },
-  { name: 'Beetroot Avocado Toast', image: '/foods/beetroot-avocado-toast.jpg', price: 343, cat: 'Savoury', color: '#9E4B3A', desc: 'Whipped feta, roasted beets, fried onion, dukkah, pickles', veg: true },
-  { name: 'Skillet Croque Monsieur', image: '/foods/croque-monsieur.jpg', price: 412, cat: 'Savoury', color: '#9E4B3A', desc: 'Ham & cheese scrambled eggs, mornay sauce, bacon crumble, sourdough' },
-  { name: 'Veg Ragout & Herb Labneh', image: '/foods/veg-ragout-labneh.jpg', price: 343, cat: 'Savoury', color: '#9E4B3A', desc: 'Soft herb labneh, roasted vegetable ragout, chilli crisp, sourdough', veg: true },
-  // SWEET
-  { name: 'Tropical Smoothie Bowl', image: '/foods/tropical-smoothie.jpg', price: 343, cat: 'Sweet', color: '#C4785A', desc: 'Coconut milk, mango, passion fruit, granola & fruits', veg: true },
-  { name: 'Cocoa Raspberry Smoothie Bowl', image: '/foods/cocoa-raspberry-smoothie.jpg', price: 343, cat: 'Sweet', color: '#C4785A', desc: 'Granola, yoghurt, fresh fruit and mixed nuts', veg: true },
-  { name: 'Granola Bowl', image: '/foods/granola-bowl.jpg', price: 343, cat: 'Sweet', color: '#C4785A', desc: 'Greek yoghurt, house granola, roasted peach and poached rhubarb', veg: true },
-  { name: 'Honey Butter French Toast', image: '/foods/honey-french-toast.jpg', price: 351, cat: 'Sweet', color: '#C4785A', desc: 'Brioche toast, vanilla custard, poached rhubarb, granola & honeycomb', veg: true },
-  { name: 'Ricotta Pancakes', image: '/foods/ricotta-pancakes.jpg', price: 351, cat: 'Sweet', color: '#C4785A', desc: 'Maple, berries, whipped mascarpone & white chocolate crumble', veg: true },
-];
+const MIN_CATALOG_SIZE = 500;
 
 export async function seedDatabase() {
   const adminPassword = await bcrypt.hash('admin123', 10);
@@ -38,49 +21,65 @@ export async function seedDatabase() {
     await User.create({ name: 'John Cashier', email: 'cashier@cafe.com', password: cashierPassword, role: 'EMPLOYEE' });
   }
 
-  // Remove old categories
-  const oldCats = ['Toast & Brunch', 'Smoothie Bowls', 'Cafe Bowls', 'Beverages', 'Snacks'];
-  const categoryMap = new Map<string, string>();
+  const activeCount = await Product.countDocuments({ isActive: true });
+  if (activeCount < MIN_CATALOG_SIZE) {
+    console.log('  Seed: building mega menu catalog (500+ items)…');
+    const catalog = generateCatalogProducts();
+    const categoryMap = new Map<string, string>();
 
-  for (const item of MENU) {
-    if (!categoryMap.has(item.cat)) {
-      let cat = await ProductCategory.findOne({ name: item.cat });
-      if (!cat) cat = await ProductCategory.create({ name: item.cat, color: item.color });
-      else { cat.color = item.color; await cat.save(); }
-      categoryMap.set(item.cat, String(cat._id));
+    for (const item of catalog) {
+      if (!categoryMap.has(item.category)) {
+        let cat = await ProductCategory.findOne({ name: item.category });
+        if (!cat) cat = await ProductCategory.create({ name: item.category, color: item.color });
+        else { cat.color = item.color; await cat.save(); }
+        categoryMap.set(item.category, String(cat._id));
+      }
     }
+
+    const catalogNames = catalog.map((m) => m.name);
+    const BATCH = 100;
+    for (let i = 0; i < catalog.length; i += BATCH) {
+      const chunk = catalog.slice(i, i + BATCH);
+      await Promise.all(chunk.map((item) =>
+        Product.findOneAndUpdate(
+          { name: item.name },
+          {
+            name: item.name,
+            categoryId: categoryMap.get(item.category)!,
+            price: item.price,
+            unitOfMeasure: 'per serving',
+            tax: 5,
+            description: item.description,
+            imageUrl: item.imageUrl ?? null,
+            isActive: true,
+            sendToKitchen: item.sendToKitchen,
+            tags: item.tags,
+            isBestseller: item.isBestseller,
+            isNewArrival: item.isNew,
+            spiceLevel: item.spiceLevel,
+          },
+          { upsert: true },
+        ),
+      ));
+    }
+
+    await Product.updateMany({ name: { $nin: catalogNames } }, { isActive: false });
+
+    const stats = getCatalogStats(catalog);
+    console.log(`  Seed: ${stats.totalProducts} products · ${stats.totalCategories} categories · ${stats.bestsellers} bestsellers`);
+  } else {
+    console.log(`  Seed: catalog ready (${activeCount} active products)`);
   }
 
-  const menuNames = MENU.map((m) => m.name);
-  for (const item of MENU) {
-    await Product.findOneAndUpdate(
-      { name: item.name },
-      {
-        name: item.name,
-        categoryId: categoryMap.get(item.cat)!,
-        price: item.price,
-        unitOfMeasure: 'per serving',
-        tax: 5,
-        description: item.desc,
-        imageUrl: item.image,
-        isActive: true,
-        sendToKitchen: true,
-      },
-      { upsert: true, new: true },
-    );
-  }
-
-  // Deactivate products not in menu
-  await Product.updateMany({ name: { $nin: menuNames } }, { isActive: false });
+  await refreshAllProductImages();
 
   let groundFloor = await Floor.findOne({ name: 'Ground Floor' });
   if (!groundFloor) groundFloor = await Floor.create({ name: 'Ground Floor' });
 
-  if (!(await RestaurantTable.findOne({ floorId: groundFloor._id, tableNumber: 1 }))) {
-    await RestaurantTable.create({ tableNumber: 1, seats: 4, floorId: groundFloor._id });
-  }
-  if (!(await RestaurantTable.findOne({ floorId: groundFloor._id, tableNumber: 2 }))) {
-    await RestaurantTable.create({ tableNumber: 2, seats: 2, floorId: groundFloor._id });
+  for (let t = 1; t <= 8; t++) {
+    if (!(await RestaurantTable.findOne({ floorId: groundFloor._id, tableNumber: t }))) {
+      await RestaurantTable.create({ tableNumber: t, seats: t <= 4 ? 4 : 6, floorId: groundFloor._id });
+    }
   }
 
   if (!(await Coupon.findOne({ code: 'WELCOME10' }))) {
@@ -99,7 +98,83 @@ export async function seedDatabase() {
     await Customer.create({ name: 'Jane Doe', email: 'jane@example.com', phone: '+1-555-0100' });
   }
 
-  console.log('  Seed: breakfast menu ready (14 items, real photos)');
+  await seedComboMeals();
+}
+
+async function seedComboMeals() {
+  if (await ComboMeal.countDocuments() > 0) return;
+
+  const findByName = async (name: string) => Product.findOne({ name, isActive: true });
+  const findLike = async (pattern: RegExp) => Product.findOne({ name: pattern, isActive: true });
+
+  const combos = [
+    {
+      name: 'Power Breakfast Combo',
+      tagline: 'Start strong',
+      description: 'Savoury eggs + fresh juice + artisan coffee',
+      discountPercent: 12,
+      items: ['Pesto Eggs on Toast', 'Classic Orange', 'Classic Espresso'],
+    },
+    {
+      name: 'Sweet Tooth Combo',
+      tagline: 'For dessert lovers',
+      description: 'Pancakes, smoothie bowl & mocha',
+      discountPercent: 15,
+      items: ['Ricotta Pancakes', 'Tropical Smoothie Bowl', 'Classic Mocha'],
+    },
+    {
+      name: 'Indian Feast Combo',
+      tagline: 'Spice route special',
+      description: 'Butter chicken, biryani & masala chai',
+      discountPercent: 10,
+      items: ['Classic Butter Chicken', /Royal Biryani/, 'Classic Masala Chai'],
+    },
+    {
+      name: 'Pizza & Chill Combo',
+      tagline: 'Shareable vibes',
+      description: 'Wood-fired pizza, mocktail & garlic bread',
+      discountPercent: 14,
+      items: ['Classic Margherita', 'Classic Virgin Mojito', /Garlic Bread/],
+    },
+    {
+      name: 'Healthy Bowl Combo',
+      tagline: 'Clean eating',
+      description: 'Quinoa bowl, green detox juice & matcha latte',
+      discountPercent: 11,
+      items: [/Quinoa Bowl/, /Green Detox/, /Matcha Latte/],
+    },
+    {
+      name: 'Kids Party Combo',
+      tagline: 'Little ones love it',
+      description: 'Mini pizza, nuggets & chocolate shake',
+      discountPercent: 18,
+      items: [/Mini Pizza/, /Chicken Nuggets/, /Chocolate Shake/],
+    },
+  ];
+
+  for (const combo of combos) {
+    const resolved = [];
+    let total = 0;
+    for (const item of combo.items) {
+      const p = typeof item === 'string'
+        ? await findByName(item)
+        : await findLike(item);
+      if (!p) continue;
+      resolved.push({ productId: p._id, quantity: 1 });
+      total += p.price;
+    }
+    if (resolved.length < 2) continue;
+    const price = Math.round(total * (1 - combo.discountPercent / 100));
+    await ComboMeal.create({
+      name: combo.name,
+      tagline: combo.tagline,
+      description: combo.description,
+      price,
+      discountPercent: combo.discountPercent,
+      items: resolved,
+    });
+  }
+  console.log('  Seed: combo meals ready');
 }
 
 const isDirectRun = process.argv[1] === fileURLToPath(import.meta.url);

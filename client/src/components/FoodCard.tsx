@@ -1,5 +1,5 @@
-import { useState, type CSSProperties } from 'react';
-import { getFoodImage } from '../lib/foodImages';
+import { useState, useEffect, type CSSProperties } from 'react';
+import { getFoodImage, getFoodImageFallback } from '../lib/foodImages';
 
 interface FoodCardProps {
   name: string;
@@ -9,19 +9,30 @@ interface FoodCardProps {
   imageUrl?: string | null;
   accent?: string;
   vegetarian?: boolean;
+  badges?: string[];
+  categoryName?: string | null;
   disabled?: boolean;
-  onAdd: () => void;
+  onAdd?: () => void;
 }
 
 export default function FoodCard({
   name, description, price, tax, imageUrl, accent = '#9E4B3A',
-  vegetarian, disabled, onAdd,
+  vegetarian, badges, disabled, onAdd, categoryName,
 }: FoodCardProps) {
   const [added, setAdded] = useState(false);
-  const img = getFoodImage(name, imageUrl);
+  const [imgSrc, setImgSrc] = useState(() => getFoodImage(name, imageUrl, categoryName));
+  const img = imgSrc;
+
+  useEffect(() => {
+    setImgSrc(getFoodImage(name, imageUrl, categoryName));
+  }, [name, imageUrl, categoryName]);
+
+  function handleImgError() {
+    setImgSrc(getFoodImageFallback(name, categoryName));
+  }
 
   function handleClick() {
-    if (disabled) return;
+    if (disabled || !onAdd) return;
     setAdded(true);
     onAdd();
     setTimeout(() => setAdded(false), 600);
@@ -36,8 +47,11 @@ export default function FoodCard({
       style={{ '--accent': accent } as CSSProperties}
     >
       <div className="menu-food-photo">
-        <img src={img} alt={name} loading="lazy" />
+        <img src={img} alt={name} loading="lazy" onError={handleImgError} />
         {vegetarian && <span className="veg-badge" title="Vegetarian">🌿</span>}
+        {badges && badges.length > 0 && (
+          <span className="food-badges">{badges.join(' ')}</span>
+        )}
       </div>
       <div className="menu-food-info">
         <h4>{name}</h4>

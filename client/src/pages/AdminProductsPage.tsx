@@ -13,6 +13,7 @@ import {
   updateProduct,
 } from '../lib/api';
 import '../styles/pos.css';
+import '../styles/menu-explorer.css';
 
 const emptyForm = {
   name: '',
@@ -23,6 +24,8 @@ const emptyForm = {
   description: '',
   sendToKitchen: true,
 };
+
+const PAGE_SIZE = 50;
 
 export default function AdminProductsPage() {
   const user = getStoredUser();
@@ -35,23 +38,40 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [searchQ, setSearchQ] = useState('');
+  const [filterCat, setFilterCat] = useState('');
 
-  function load() {
-    Promise.all([fetchAllProducts(), fetchCategories()])
-      .then(([p, c]) => {
-        setProducts(p.products);
-        setCategories(c.categories);
-        if (!form.categoryId && c.categories[0]) {
-          setForm((f) => ({ ...f, categoryId: c.categories[0].id }));
+  function load(p = page) {
+    setLoading(true);
+    Promise.all([
+      fetchAllProducts({ page: p, limit: PAGE_SIZE, categoryId: filterCat || undefined, q: searchQ || undefined }),
+      fetchCategories(),
+    ])
+      .then(([prodRes, catRes]) => {
+        setProducts(prodRes.products);
+        setTotal(prodRes.total);
+        setPage(prodRes.page);
+        setCategories(catRes.categories);
+        if (!form.categoryId && catRes.categories[0]) {
+          setForm((f) => ({ ...f, categoryId: catRes.categories[0].id }));
         }
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load'))
       .finally(() => setLoading(false));
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(1); }, [filterCat]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => load(1), searchQ ? 350 : 0);
+    return () => clearTimeout(timer);
+  }, [searchQ]);
 
   if (!user || user.role !== 'ADMIN') return <Navigate to="/dashboard" replace />;
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   async function handleCreateCategory() {
     if (!newCat.name.trim()) return;
@@ -91,7 +111,7 @@ export default function AdminProductsPage() {
       }
       setForm({ ...emptyForm, categoryId: categories[0]?.id ?? '' });
       setEditingId(null);
-      load();
+      load(page);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed');
     }
@@ -115,16 +135,15 @@ export default function AdminProductsPage() {
     try {
       await deleteProduct(id);
       setMessage('Product deactivated');
-      load();
+      load(page);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Delete failed');
     }
   }
 
   return (
-    <AppLayout title="Menu Admin" subtitle="Manage breakfast items">
+    <AppLayout title="Menu Admin" subtitle={`${total} products · paginated catalog`}>
       <div className="pos-page admin-page">
-        {loading && <p className="pos-muted">Loading…</p>}
         {error && <div className="pos-error">{error}</div>}
         {message && <div className="pos-success">{message}</div>}
 
@@ -179,13 +198,30 @@ export default function AdminProductsPage() {
           </form>
 
           <div className="admin-list">
-            <h3>All Products</h3>
+            <h3>All Products ({total})</h3>
+            <div className="explorer-toolbar" style={{ marginBottom: '0.75rem' }}>
+              <input
+                className="pill-input explorer-search"
+                placeholder="Search products…"
+                value={searchQ}
+                onChange={(e) => setSearchQ(e.target.value)}
+              />
+              <select className="pill-input" value={filterCat} onChange={(e) => setFilterCat(e.target.value)}>
+                <option value="">All categories</option>
+                {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+
+            {loading && <p className="pos-muted">Loading…</p>}
+
             {products.map((p) => (
               <div key={p.id} className={`admin-product-row${p.isActive === false ? ' inactive' : ''}`}>
                 <div>
                   {p.category && <span className="cat-dot" style={{ background: p.category.color }} />}
                   <strong>{p.name}</strong>
                   <span className="pos-muted"> — ₹{p.price.toFixed(2)} · {p.category?.name}</span>
+                  {p.isBestseller && <span className="inactive-tag">⭐</span>}
+                  {p.isNewArrival && <span className="inactive-tag">NEW</span>}
                   {p.sendToKitchen === false && <span className="inactive-tag">No KDS</span>}
                   {p.isActive === false && <span className="inactive-tag">Inactive</span>}
                 </div>
@@ -197,6 +233,16 @@ export default function AdminProductsPage() {
                 </div>
               </div>
             ))}
+
+            {totalPages > 1 && (
+              <div className="admin-pagination">
+                <button type="button" className="terminal-btn cafe-btn-outline" disabled={page <= 1}
+                  onClick={() => load(page - 1)}>← Prev</button>
+                <span>Page {page} of {totalPages}</span>
+                <button type="button" className="terminal-btn cafe-btn-outline" disabled={page >= totalPages}
+                  onClick={() => load(page + 1)}>Next →</button>
+              </div>
+            )}
           </div>
         </div>
       </div>

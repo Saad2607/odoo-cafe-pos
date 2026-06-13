@@ -1,0 +1,261 @@
+.menu-explorer-page {
+  padding: 0 0 2rem;
+}
+
+.explorer-stats-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #3d2317 0%, #6b3d2e 50%, #9e4b3a 100%);
+  border-radius: 16px;
+  color: #fff;
+}
+
+.explorer-stat {
+  display: flex;
+  flex-direction: column;
+  min-width: 72px;
+}
+
+.explorer-stat strong {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.explorer-stat span {
+  font-size: 0.75rem;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.explorer-surprise-btn {
+  margin-left: auto;
+  padding: 0.65rem 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.explorer-surprise-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.03);
+}
+
+.explorer-surprise-toast {
+  position: sticky;
+  top: 72px;
+  z-index: 20;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1.25rem;
+  background: #fff8e1;
+  border: 1px solid #ffc107;
+  border-radius: 12px;
+  animation: explorer-pop 0.35s ease;
+}
+
+@keyframes explorer-pop {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.explorer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.explorer-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.explorer-tag-filters,
+.explorer-category-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.explorer-tag-chip,
+.explorer-cat-chip {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid #e0d5cc;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.explorer-tag-chip.active,
+.explorer-cat-chip.active {
+  background: var(--cat-color, #9e4b3a);
+  border-color: var(--cat-color, #9e4b3a);
+  color: #fff;
+}
+
+.explorer-cat-count {
+  margin-left: 0.35rem;
+  opacity: 0.75;
+  font-size: 0.75rem;
+}
+
+.explorer-result-count {
+  margin-bottom: 1rem;
+  color: #7a6a5e;
+  font-size: 0.9rem;
+}
+
+.explorer-category-section {
+  margin-bottom: 2rem;
+  padding-top: 0.5rem;
+  border-top: 3px solid #e8ddd4;
+}
+
+.explorer-category-section h3 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
+
+.explorer-grid .menu-food-card-disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.food-badges {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-size: 0.7rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.combo-deals-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #fff5eb, #ffe8d6);
+  border: 1px solid #e8c4a8;
+  border-radius: 14px;
+}
+
+.combo-deals-section h3 {
+  margin: 0 0 0.75rem;
+  color: #5d4037;
+}
+
+.combo-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.combo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem;
+  border: 1px solid #d7b89a;
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+
+.combo-card:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(93, 64, 55, 0.15);
+  transform: translateY(-2px);
+}
+
+.combo-card:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.combo-card strong {
+  font-size: 0.95rem;
+  color: #3e2723;
+}
+
+.combo-card-tagline {
+  font-size: 0.75rem;
+  color: #8d6e63;
+}
+
+.combo-card-items {
+  font-size: 0.72rem;
+  color: #6d4c41;
+  line-height: 1.35;
+}
+
+.combo-card-price {
+  margin-top: auto;
+  font-weight: 700;
+  color: #9e4b3a;
+}
+
+.combo-card-save {
+  font-size: 0.72rem;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.admin-pagination span {
+  color: #7a6a5e;
+  font-size: 0.9rem;
+}
+
+.dash-catalog-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #1a472a 0%, #2e7d32 100%);
+  border-radius: 16px;
+  color: #fff;
+}
+
+.dash-catalog-banner p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.dash-catalog-stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.dash-catalog-stats span {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.dash-catalog-stats strong {
+  display: block;
+  font-size: 1.35rem;
+}

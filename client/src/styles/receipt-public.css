@@ -1,0 +1,84 @@
+.receipt-public-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #FDFBF7, #f5ebe3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.receipt-public-card {
+  background: #fff;
+  border: 1px solid #e8ddd4;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(92, 83, 74, 0.12);
+}
+
+.receipt-public-head h1 {
+  margin: 0;
+  color: #9E4B3A;
+}
+
+.receipt-public-head p {
+  margin: 0.25rem 0 1rem;
+  color: #8a8494;
+}
+
+.receipt-public-meta p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.receipt-public-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.receipt-public-table th,
+.receipt-public-table td {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0e6dc;
+  text-align: left;
+}
+
+.receipt-public-table th:not(:first-child),
+.receipt-public-table td:not(:first-child) {
+  text-align: right;
+}
+
+.receipt-line-promo {
+  display: block;
+  color: #2e7d32;
+  font-size: 0.75rem;
+}
+
+.receipt-public-totals p {
+  margin: 0.35rem 0;
+}
+
+.receipt-discount {
+  color: #2e7d32;
+}
+
+.receipt-grand-total {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #9E4B3A;
+  margin-top: 0.5rem !important;
+}
+
+.receipt-public-footer {
+  margin: 1.25rem 0;
+  color: #8a8494;
+  font-style: italic;
+}
+
+@media print {
+  .receipt-public-page { background: white; padding: 0; }
+  button { display: none !important; }
+}

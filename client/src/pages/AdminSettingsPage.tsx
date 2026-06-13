@@ -123,19 +123,23 @@ export default function AdminSettingsPage() {
               <li key={c.id}>
                 <span className="cat-swatch" style={{ background: c.color }} />
                 {editingCat?.id === c.id ? (
-                  <>
+                  <div className="category-list-edit-row">
                     <input className="pill-input" value={editingCat.name}
                       onChange={(e) => setEditingCat({ ...editingCat, name: e.target.value })} />
                     <input type="color" value={editingCat.color}
                       onChange={(e) => setEditingCat({ ...editingCat, color: e.target.value })} />
-                    <button type="button" className="terminal-btn cafe-btn-primary" onClick={handleSaveCategoryEdit}>Save</button>
-                    <button type="button" className="terminal-btn cafe-btn-outline" onClick={() => setEditingCat(null)}>Cancel</button>
-                  </>
+                    <div className="category-list-actions">
+                      <button type="button" className="terminal-btn cafe-btn-primary" onClick={handleSaveCategoryEdit}>Save</button>
+                      <button type="button" className="terminal-btn cafe-btn-outline" onClick={() => setEditingCat(null)}>Cancel</button>
+                    </div>
+                  </div>
                 ) : (
                   <>
-                    {c.name}
-                    <button type="button" className="terminal-btn cafe-btn-outline" onClick={() => setEditingCat(c)}>Edit</button>
-                    <button type="button" className="terminal-btn cafe-btn-danger" onClick={() => handleDeleteCategory(c.id)}>Delete</button>
+                    <span className="category-list-name">{c.name}</span>
+                    <div className="category-list-actions">
+                      <button type="button" className="terminal-btn cafe-btn-outline" onClick={() => setEditingCat(c)}>Edit</button>
+                      <button type="button" className="terminal-btn cafe-btn-danger" onClick={() => handleDeleteCategory(c.id)}>Delete</button>
+                    </div>
                   </>
                 )}
               </li>

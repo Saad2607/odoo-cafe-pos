@@ -1,0 +1,113 @@
+.pos-session-card {
+  background: #fffaf7;
+  border: 1px solid #e8ddd4;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pos-session-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.pos-session-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.pos-session-status {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.pos-session-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pos-session-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8a8494;
+  margin-bottom: 0.2rem;
+}
+
+.pos-session-grid strong {
+  display: block;
+  font-size: 1.25rem;
+}
+
+.pos-session-sub {
+  display: block;
+  font-size: 0.8rem;
+  color: #8a8494;
+  margin-top: 0.15rem;
+}
+
+.pos-session-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.session-close-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 20, 16, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 1rem;
+}
+
+.session-close-modal {
+  background: #fffaf7;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+
+.session-close-modal h2 {
+  margin: 0 0 0.35rem;
+  color: #9E4B3A;
+}
+
+.session-close-summary {
+  margin: 1.25rem 0 1.5rem;
+  text-align: left;
+}
+
+.session-close-summary div {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0e6dc;
+}
+
+.session-close-summary dt {
+  color: #8a8494;
+  font-weight: 600;
+}
+
+.session-close-summary dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .pos-session-grid { grid-template-columns: 1fr; }
+}

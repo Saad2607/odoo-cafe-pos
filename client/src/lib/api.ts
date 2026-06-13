@@ -32,7 +32,38 @@ export interface Product {
   imageUrl?: string | null;
   sendToKitchen?: boolean;
   isActive?: boolean;
+  tags?: string[];
+  isBestseller?: boolean;
+  isNewArrival?: boolean;
+  spiceLevel?: number;
   category: Category | null;
+}
+
+export interface ProductStats {
+  totalProducts: number;
+  totalCategories: number;
+  bestsellers: number;
+  newItems: number;
+  vegItems: number;
+  categories: Array<Category & { count: number }>;
+}
+
+export interface ComboMeal {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  price: number;
+  discountPercent: number;
+  originalTotal: number;
+  savings: number;
+  items: Array<{
+    productId: string;
+    productName: string;
+    quantity: number;
+    price: number;
+    category: Category | null;
+  }>;
 }
 
 export interface TableInfo {
@@ -168,7 +199,7 @@ export function getStoredSession(): PosSession | null {
   return raw ? JSON.parse(raw) : null;
 }
 
-/** PDF: Employee → floor popup on session start; Admin → dashboard */
+/** Admin → dashboard; Employee → floor with table popup */
 export function getHomeRoute(role: User['role']): string {
   return role === 'EMPLOYEE' ? '/floor' : '/dashboard';
 }
@@ -251,8 +282,31 @@ export async function deleteTable(tableId: string) {
   return apiFetch<{ message: string }>(`/floors/tables/${tableId}`, { method: 'DELETE' });
 }
 
-export async function fetchProducts() {
-  return apiFetch<{ products: Product[] }>('/products');
+export async function fetchProducts(params?: {
+  categoryId?: string;
+  tag?: string;
+  bestseller?: boolean;
+  new?: boolean;
+  q?: string;
+  limit?: number;
+}) {
+  const qs = new URLSearchParams();
+  if (params?.categoryId) qs.set('categoryId', params.categoryId);
+  if (params?.tag) qs.set('tag', params.tag);
+  if (params?.bestseller) qs.set('bestseller', 'true');
+  if (params?.new) qs.set('new', 'true');
+  if (params?.q) qs.set('q', params.q);
+  if (params?.limit) qs.set('limit', String(params.limit));
+  const query = qs.toString();
+  return apiFetch<{ products: Product[] }>(`/products${query ? `?${query}` : ''}`);
+}
+
+export async function fetchProductStats() {
+  return apiFetch<ProductStats>('/products/stats');
+}
+
+export async function fetchCombos() {
+  return apiFetch<{ combos: ComboMeal[] }>('/combos');
 }
 
 export async function fetchTableOrder(tableId: string) {
@@ -282,7 +336,7 @@ export async function payOrder(
   return apiFetch<{
     message: string;
     order: Order;
-    receipt?: { emailed: boolean; to?: string };
+    receipt?: { emailed: boolean; to?: string; viewUrl?: string; emailSent?: boolean };
   }>(`/orders/${orderId}/pay`, {
     method: 'PATCH',
     body: JSON.stringify(data),
@@ -329,8 +383,16 @@ export async function closeSession() {
   }>('/session/close', { method: 'POST' });
 }
 
-export async function fetchAllProducts() {
-  return apiFetch<{ products: Product[] }>('/products/all');
+export async function fetchAllProducts(params?: { page?: number; limit?: number; categoryId?: string; q?: string }) {
+  const qs = new URLSearchParams();
+  if (params?.page) qs.set('page', String(params.page));
+  if (params?.limit) qs.set('limit', String(params.limit));
+  if (params?.categoryId) qs.set('categoryId', params.categoryId);
+  if (params?.q) qs.set('q', params.q);
+  const query = qs.toString();
+  return apiFetch<{ products: Product[]; total: number; page: number; limit: number }>(
+    `/products/all${query ? `?${query}` : ''}`,
+  );
 }
 
 export async function createProduct(data: {
@@ -594,9 +656,31 @@ export async function deleteCustomer(id: string) {
 }
 
 export async function sendReceiptEmail(orderId: string, email: string) {
-  return apiFetch<{ message: string; sent: boolean }>(`/orders/${orderId}/send-receipt`, {
+  return apiFetch<{
+    message: string;
+    sent: boolean;
+    emailSent: boolean;
+    viewUrl: string;
+    recipient?: string;
+    emailError?: string | null;
+  }>(`/orders/${orderId}/send-receipt`, {
     method: 'POST',
     body: JSON.stringify({ email }),
+  });
+}
+
+export async function fetchPublicReceipt(token: string) {
+  const res = await fetch(`/api/receipt/${token}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Receipt not found' }));
+    throw new Error(err.error || 'Receipt not found');
+  }
+  return res.json() as Promise<{ order: Order }>;
+}
+
+export async function openSession() {
+  return apiFetch<{ session: { id: string; sessionNumber: string } }>('/session/open', {
+    method: 'POST',
   });
 }
 
@@ -643,4 +727,48 @@ export async function updateBooking(id: string, data: Partial<{
 
 export async function deleteBooking(id: string) {
   return apiFetch<{ message: string }>(`/bookings/${id}`, { method: 'DELETE' });
+}
+
+export interface LiveOpsData {
+  session: {
+    sessionNumber: string;
+    openedAt?: string;
+    lastClosingSale: number;
+  };
+  stats: {
+    totalSales: number;
+    paidCount: number;
+    kitchenCount: number;
+    activeTables: number;
+    totalTables: number;
+    draftCount: number;
+  };
+  floors: Array<{
+    id: string;
+    name: string;
+    tables: Array<{
+      id: string;
+      tableNumber: number;
+      seats: number;
+      status: 'FREE' | 'OCCUPIED';
+    }>;
+  }>;
+  kitchenQueue: Array<{
+    id: string;
+    orderNumber: string;
+    kitchenStatus: string;
+    tableNumber: number | null;
+    itemCount: number;
+    amount: number;
+  }>;
+  recentSales: Array<{
+    orderNumber: string;
+    amount: number;
+    date: string;
+    paymentMethod: string | null;
+  }>;
+}
+
+export async function fetchLiveOps() {
+  return apiFetch<LiveOpsData>('/live');
 }

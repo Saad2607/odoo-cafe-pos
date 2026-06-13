@@ -4,16 +4,22 @@ import '../styles/receipt.css';
 interface ReceiptPrintProps {
   order: Order;
   onClose: () => void;
+  onSendReceipt?: () => void;
+  onBackToFloor?: () => void;
 }
 
-export default function ReceiptPrint({ order, onClose }: ReceiptPrintProps) {
+export default function ReceiptPrint({ order, onClose, onSendReceipt, onBackToFloor }: ReceiptPrintProps) {
   function handlePrint() {
     window.print();
   }
 
   return (
-    <div className="receipt-overlay no-print-overlay" onClick={onClose}>
-      <div className="receipt-modal" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="receipt-overlay no-print-overlay"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="receipt-modal" onMouseDown={(e) => e.stopPropagation()}>
+        <p className="receipt-success-banner">Payment complete</p>
         <div className="receipt-print-area" id="receipt-print">
           <header className="receipt-header">
             <h2>BRIVIO</h2>
@@ -68,9 +74,19 @@ export default function ReceiptPrint({ order, onClose }: ReceiptPrintProps) {
           <button type="button" className="terminal-btn cafe-btn-primary" onClick={handlePrint}>
             Print Receipt
           </button>
+          {onSendReceipt && (
+            <button type="button" className="terminal-btn cafe-btn-outline" onClick={onSendReceipt}>
+              Send Receipt
+            </button>
+          )}
           <button type="button" className="terminal-btn cafe-btn-outline" onClick={onClose}>
-            Close
+            Stay on Order
           </button>
+          {onBackToFloor && (
+            <button type="button" className="terminal-btn cafe-btn-outline" onClick={onBackToFloor}>
+              Back to Floor
+            </button>
+          )}
         </div>
       </div>
     </div>

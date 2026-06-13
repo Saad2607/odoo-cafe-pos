@@ -4,8 +4,6 @@ import { authenticate, requireRole } from '../middleware/auth.js';
 import { Product } from '../models/Product.js';
 import { ProductCategory } from '../models/ProductCategory.js';
 
-const router = Router();
-
 function mapProduct(p: {
   _id: unknown;
   name: string;
@@ -16,6 +14,10 @@ function mapProduct(p: {
   imageUrl?: string;
   sendToKitchen?: boolean;
   isActive: boolean;
+  tags?: string[];
+  isBestseller?: boolean;
+  isNewArrival?: boolean;
+  spiceLevel?: number;
   categoryId: { _id?: unknown; name?: string; color?: string } | unknown;
 }) {
   return {
@@ -28,6 +30,10 @@ function mapProduct(p: {
     imageUrl: p.imageUrl ?? null,
     sendToKitchen: p.sendToKitchen ?? true,
     isActive: p.isActive,
+    tags: p.tags ?? [],
+    isBestseller: p.isBestseller ?? false,
+    isNewArrival: p.isNewArrival ?? false,
+    spiceLevel: p.spiceLevel ?? 0,
     category: p.categoryId && typeof p.categoryId === 'object'
       ? {
           id: String((p.categoryId as { _id: unknown })._id),
@@ -38,6 +44,8 @@ function mapProduct(p: {
   };
 }
 
+const router = Router();
+
 const productSchema = z.object({
   name: z.string().min(1),
   categoryId: z.string().min(1),
@@ -47,6 +55,35 @@ const productSchema = z.object({
   description: z.string().optional(),
   imageUrl: z.string().optional(),
   sendToKitchen: z.boolean().optional(),
+});
+
+router.get('/stats', authenticate, async (_req, res) => {
+  try {
+    const [total, categories, bestsellers, newItems, vegItems] = await Promise.all([
+      Product.countDocuments({ isActive: true }),
+      ProductCategory.countDocuments(),
+      Product.countDocuments({ isActive: true, isBestseller: true }),
+      Product.countDocuments({ isActive: true, isNewArrival: true }),
+      Product.countDocuments({ isActive: true, tags: 'VEG' }),
+    ]);
+    const cats = await ProductCategory.find().sort({ name: 1 });
+    const perCategory = await Promise.all(cats.map(async (c) => ({
+      id: String(c._id),
+      name: c.name,
+      color: c.color,
+      count: await Product.countDocuments({ categoryId: c._id, isActive: true }),
+    })));
+    return res.json({
+      totalProducts: total,
+      totalCategories: categories,
+      bestsellers,
+      newItems,
+      vegItems,
+      categories: perCategory,
+    });
+  } catch {
+    return res.status(500).json({ error: 'Failed to fetch stats' });
+  }
 });
 
 router.get('/categories', authenticate, async (_req, res) => {
@@ -64,23 +101,39 @@ router.get('/categories', authenticate, async (_req, res) => {
   }
 });
 
-router.get('/all', authenticate, requireRole('ADMIN'), async (_req, res) => {
+router.get('/all', authenticate, requireRole('ADMIN'), async (req, res) => {
   try {
-    const products = await Product.find()
-      .populate('categoryId', 'name color')
-      .sort({ name: 1 });
-    return res.json({ products: products.map(mapProduct) });
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(20, Number(req.query.limit) || 50));
+    const filter: Record<string, unknown> = {};
+    if (req.query.categoryId) filter.categoryId = req.query.categoryId;
+    if (req.query.q) filter.name = { $regex: String(req.query.q), $options: 'i' };
+
+    const [products, total] = await Promise.all([
+      Product.find(filter).populate('categoryId', 'name color').sort({ name: 1 }).skip((page - 1) * limit).limit(limit),
+      Product.countDocuments(filter),
+    ]);
+    return res.json({ products: products.map(mapProduct), total, page, limit });
   } catch {
     return res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
 
-router.get('/', authenticate, async (_req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
-    const products = await Product.find({ isActive: true })
+    const filter: Record<string, unknown> = { isActive: true };
+    if (req.query.categoryId) filter.categoryId = req.query.categoryId;
+    if (req.query.tag) filter.tags = String(req.query.tag).toUpperCase();
+    if (req.query.bestseller === 'true') filter.isBestseller = true;
+    if (req.query.new === 'true') filter.isNewArrival = true;
+    if (req.query.q) filter.name = { $regex: String(req.query.q), $options: 'i' };
+
+    const query = Product.find(filter)
       .populate('categoryId', 'name color')
-      .sort({ name: 1 });
-    return res.json({ products: products.map(mapProduct) });
+      .sort({ isBestseller: -1, name: 1 });
+    if (req.query.limit) query.limit(Number(req.query.limit));
+    const result = await query;
+    return res.json({ products: result.map(mapProduct) });
   } catch {
     return res.status(500).json({ error: 'Failed to fetch products' });
   }

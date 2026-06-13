@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import FloorPopup, { clearFloorPopupFlag, shouldShowFloorPopup } from '../components/FloorPopup';
-import { fetchFloors, Floor } from '../lib/api';
+import PosSessionCard from '../components/PosSessionCard';
+import { fetchFloors, fetchSessionStats, Floor } from '../lib/api';
 import '../styles/pos.css';
 import '../styles/floor-plan.css';
+import '../styles/session-terminal.css';
 
 export default function FloorPlanPage() {
   const navigate = useNavigate();
@@ -13,12 +15,29 @@ export default function FloorPlanPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showPopup, setShowPopup] = useState(false);
+  const [session, setSession] = useState({
+    sessionNumber: '',
+    openedAt: '',
+    lastClosingSale: null as number | null,
+    totalSales: 0,
+    orderCount: 0,
+  });
 
   useEffect(() => {
     fetchFloors()
       .then((res) => setFloors(res.floors))
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load floor plan'))
       .finally(() => setLoading(false));
+
+    fetchSessionStats()
+      .then((res) => setSession({
+        sessionNumber: res.session.sessionNumber,
+        openedAt: res.session.openedAt,
+        lastClosingSale: res.session.lastClosingSale,
+        totalSales: res.session.totalSales ?? 0,
+        orderCount: res.session.orderCount ?? 0,
+      }))
+      .catch(() => undefined);
 
     if (shouldShowFloorPopup()) setShowPopup(true);
   }, [location.pathname]);
@@ -31,6 +50,14 @@ export default function FloorPlanPage() {
   return (
     <AppLayout title="Table View" subtitle="Floor plan & table selection">
       <div className="pos-page cafe-floor-page">
+        <PosSessionCard
+          sessionNumber={session.sessionNumber}
+          openedAt={session.openedAt}
+          lastClosingSale={session.lastClosingSale}
+          totalSales={session.totalSales}
+          orderCount={session.orderCount}
+          onOpenSession={() => setShowPopup(true)}
+        />
         <p className="pos-muted floor-hint">
           Tap a table to open the order view. Occupied tables are highlighted.
         </p>

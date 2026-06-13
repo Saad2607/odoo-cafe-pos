@@ -164,7 +164,7 @@ export default function OrderDetailPage() {
                     </Link>
                   )}
                   <button type="button" className="terminal-btn cafe-btn-danger" onClick={handleCancel}>
-                    Cancel Order
+                    Delete Order
                   </button>
                 </>
               )}

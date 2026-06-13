@@ -63,14 +63,33 @@
   gap: 0.75rem;
   padding: 0.5rem 0;
   border-bottom: 1px solid #f0e6dc;
+  flex-wrap: wrap;
+}
+
+.category-list-name {
+  flex: 1;
+  min-width: 120px;
+}
+
+.category-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.category-list-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  flex-wrap: wrap;
 }
 
 .cat-swatch {
   width: 20px;
   height: 20px;
   border-radius: 4px;
-}
-
-.category-list li button {
-  margin-left: auto;
+  flex-shrink: 0;
 }
