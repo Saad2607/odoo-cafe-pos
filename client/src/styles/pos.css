@@ -701,6 +701,12 @@
   margin-top: 0.5rem;
 }
 
+.cart-panel-footer .order-summary {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
 .order-summary-row {
   display: flex;
   justify-content: space-between;

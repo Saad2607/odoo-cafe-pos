@@ -5,6 +5,7 @@ interface SessionCloseModalProps {
     sessionNumber: string;
     orderCount: number;
     totalSales: number;
+    totalTips?: number;
     closedAt: string;
   };
   onDone: () => void;
@@ -20,6 +21,9 @@ export default function SessionCloseModal({ summary, onDone }: SessionCloseModal
           <div><dt>Session</dt><dd>{summary.sessionNumber}</dd></div>
           <div><dt>Paid Orders</dt><dd>{summary.orderCount}</dd></div>
           <div><dt>Total Sales</dt><dd>₹{summary.totalSales.toFixed(0)}</dd></div>
+          {(summary.totalTips ?? 0) > 0 && (
+            <div><dt>Tips Collected</dt><dd>₹{summary.totalTips!.toFixed(0)}</dd></div>
+          )}
           <div><dt>Closed At</dt><dd>{new Date(summary.closedAt).toLocaleString()}</dd></div>
         </dl>
         <button type="button" className="terminal-btn cafe-btn-primary" onClick={onDone}>

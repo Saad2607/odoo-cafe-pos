@@ -1,4 +1,4 @@
-import { Order } from '../lib/api';
+import { Order, orderGrandTotal } from '../lib/api';
 import '../styles/receipt.css';
 
 interface ReceiptPrintProps {
@@ -55,7 +55,8 @@ export default function ReceiptPrint({ order, onClose, onSendReceipt, onBackToFl
             {order.discount > 0 && <p>Discount: −₹{order.discount.toFixed(0)}</p>}
             {order.couponCode && <p>Coupon: {order.couponCode}</p>}
             {order.promotionName && <p>Promo: {order.promotionName}</p>}
-            <p className="receipt-grand"><strong>Total: ₹{order.amount.toFixed(0)}</strong></p>
+            {(order.tipAmount ?? 0) > 0 && <p>Tip: ₹{(order.tipAmount ?? 0).toFixed(0)}</p>}
+            <p className="receipt-grand"><strong>Total: ₹{orderGrandTotal(order).toFixed(0)}</strong></p>
             {order.amountReceived != null && (
               <p>Received: ₹{order.amountReceived.toFixed(0)}</p>
             )}

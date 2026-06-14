@@ -51,6 +51,8 @@ const paySchema = z.object({
 
   cardReference: z.string().optional(),
 
+  tipAmount: z.number().min(0).optional(),
+
 });
 
 
@@ -413,14 +415,16 @@ router.patch('/:id/pay', authenticate, async (req, res) => {
 
 
     const amountDue = order.subtotal + order.taxAmount - discount;
-    const cashMinimum = Math.round(amountDue);
+    const tipAmount = Math.round(body.tipAmount ?? 0);
+    const totalDue = amountDue + tipAmount;
+    const cashMinimum = Math.round(totalDue);
 
     if (body.paymentMethod === 'CASH') {
       if (!body.amountReceived || body.amountReceived < cashMinimum) {
         return res.status(400).json({ error: `Amount received must be at least ₹${cashMinimum}` });
       }
       order.amountReceived = body.amountReceived;
-      order.changeDue = body.amountReceived - amountDue;
+      order.changeDue = body.amountReceived - totalDue;
     }
 
 
@@ -444,6 +448,7 @@ router.patch('/:id/pay', authenticate, async (req, res) => {
     order.promotionName = promotionName;
 
     order.amount = amountDue;
+    order.tipAmount = tipAmount;
 
     order.paymentMethod = body.paymentMethod;
 

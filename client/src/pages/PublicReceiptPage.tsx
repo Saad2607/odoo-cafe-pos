@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchPublicReceipt } from '../lib/api';
+import { fetchPublicReceipt, orderGrandTotal } from '../lib/api';
 import '../styles/receipt-public.css';
 
 export default function PublicReceiptPage() {
@@ -71,7 +71,8 @@ export default function PublicReceiptPage() {
           {order.discount > 0 && <p className="receipt-discount">Discount: −₹{order.discount.toFixed(0)}</p>}
           {order.couponCode && <p>Coupon: {order.couponCode}</p>}
           {order.promotionName && <p>Promotion: {order.promotionName}</p>}
-          <p className="receipt-grand-total">Total: ₹{order.amount.toFixed(0)}</p>
+          {(order.tipAmount ?? 0) > 0 && <p>Tip: ₹{(order.tipAmount ?? 0).toFixed(0)}</p>}
+          <p className="receipt-grand-total">Total: ₹{orderGrandTotal(order).toFixed(0)}</p>
           {order.paymentMethod && <p>Paid via: {order.paymentMethod}</p>}
         </div>
         <footer className="receipt-public-footer">Thank you for visiting Brivio Cafe!</footer>

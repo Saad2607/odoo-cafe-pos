@@ -30,7 +30,8 @@ function buildReceiptText(order: ReturnType<typeof formatOrder>): string {
     order.discount > 0 ? `Discount: -₹${order.discount.toFixed(0)}` : '',
     order.couponCode ? `Coupon: ${order.couponCode}` : '',
     order.promotionName ? `Promotion: ${order.promotionName}` : '',
-    `Total: ₹${order.amount.toFixed(0)}`,
+    (order.tipAmount ?? 0) > 0 ? `Tip: ₹${(order.tipAmount ?? 0).toFixed(0)}` : '',
+    `Total: ₹${(order.amount + (order.tipAmount ?? 0)).toFixed(0)}`,
     order.paymentMethod ? `Paid via: ${order.paymentMethod}` : '',
     '',
     'Thank you for visiting Brivio!',
@@ -70,7 +71,8 @@ function buildReceiptHtml(order: ReturnType<typeof formatOrder>, viewUrl: string
     <p>Subtotal: ₹${order.subtotal.toFixed(0)}</p>
     <p>Tax: ₹${order.taxAmount.toFixed(0)}</p>
     ${order.discount > 0 ? `<p style="color:#2e7d32;">Discount: −₹${order.discount.toFixed(0)}</p>` : ''}
-    <p style="font-size:20px;font-weight:bold;color:#9E4B3A;">Total: ₹${order.amount.toFixed(0)}</p>
+    ${(order.tipAmount ?? 0) > 0 ? `<p>Tip: ₹${(order.tipAmount ?? 0).toFixed(0)}</p>` : ''}
+    <p style="font-size:20px;font-weight:bold;color:#9E4B3A;">Total: ₹${(order.amount + (order.tipAmount ?? 0)).toFixed(0)}</p>
     ${order.paymentMethod ? `<p>Paid via: ${order.paymentMethod}</p>` : ''}
     <p style="margin-top:24px;"><a href="${viewUrl}" style="background:#9E4B3A;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block;">View Receipt Online</a></p>
     <p style="color:#8a8494;font-size:12px;margin-top:20px;">Thank you for visiting Brivio Cafe!</p>

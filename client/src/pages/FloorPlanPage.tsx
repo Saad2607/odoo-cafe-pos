@@ -5,7 +5,8 @@ import FloorPopup, { clearFloorPopupFlag, shouldShowFloorPopup } from '../compon
 import PosSessionCard from '../components/PosSessionCard';
 import SessionCloseModal from '../components/SessionCloseModal';
 import { useCloseSession } from '../hooks/useCloseSession';
-import { fetchFloors, fetchSessionStats, getStoredUser, Floor } from '../lib/api';
+import OffersPanel from '../components/OffersPanel';
+import { fetchActiveOffers, fetchFloors, fetchSessionStats, getStoredUser, Floor, OfferCoupon, OfferPromotion } from '../lib/api';
 import '../styles/pos.css';
 import '../styles/floor-plan.css';
 import '../styles/session-terminal.css';
@@ -27,6 +28,10 @@ export default function FloorPlanPage() {
     totalSales: 0,
     orderCount: 0,
   });
+  const [offers, setOffers] = useState<{ coupons: OfferCoupon[]; promotions: OfferPromotion[] }>({
+    coupons: [],
+    promotions: [],
+  });
 
   useEffect(() => {
     fetchFloors()
@@ -44,6 +49,10 @@ export default function FloorPlanPage() {
       }))
       .catch(() => undefined);
 
+    fetchActiveOffers()
+      .then((res) => setOffers({ coupons: res.coupons, promotions: res.promotions }))
+      .catch(() => undefined);
+
     if (shouldShowFloorPopup()) setShowPopup(true);
   }, [location.pathname]);
 
@@ -59,6 +68,10 @@ export default function FloorPlanPage() {
           <h2>Floor Plan</h2>
           <p>Select a table to start or continue an order · Session {session.sessionNumber || '—'}</p>
         </section>
+
+        {(offers.coupons.length > 0 || offers.promotions.length > 0) && (
+          <OffersPanel coupons={offers.coupons} promotions={offers.promotions} compact />
+        )}
 
         <div className="cashier-quick-strip">
           <Link to="/orders" className="cashier-quick-card">

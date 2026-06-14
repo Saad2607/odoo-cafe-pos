@@ -9,6 +9,7 @@ import FoodCard from '../components/FoodCard';
 import PaymentModal from '../components/PaymentModal';
 import ReceiptPrint from '../components/ReceiptPrint';
 import DiscountModal from '../components/DiscountModal';
+import OffersPanel from '../components/OffersPanel';
 import ReceiptEmailModal from '../components/ReceiptEmailModal';
 import SmartPairingToast from '../components/SmartPairingToast';
 import ConfettiBurst from '../components/ConfettiBurst';
@@ -34,9 +35,13 @@ import {
   validateCoupon,
 
   fetchCombos,
+  fetchActiveOffers,
   Product,
   ComboMeal,
   Order,
+  OfferCoupon,
+  OfferPromotion,
+  orderGrandTotal,
 
   Customer,
 
@@ -95,6 +100,10 @@ export default function OrderPage() {
   const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
   const [showDiscount, setShowDiscount] = useState(false);
   const [showReceiptEmail, setShowReceiptEmail] = useState(false);
+  const [offers, setOffers] = useState<{ coupons: OfferCoupon[]; promotions: OfferPromotion[] }>({
+    coupons: [],
+    promotions: [],
+  });
 
   const [customerSearch, setCustomerSearch] = useState('');
 
@@ -114,9 +123,10 @@ export default function OrderPage() {
 
     if (!tableId) return;
 
-    Promise.all([fetchProducts(), fetchTableOrder(tableId), fetchCombos()])
+    Promise.all([fetchProducts(), fetchTableOrder(tableId), fetchCombos(), fetchActiveOffers()])
 
-      .then(([productRes, orderRes, comboRes]) => {
+      .then(([productRes, orderRes, comboRes, offersRes]) => {
+        setOffers({ coupons: offersRes.coupons, promotions: offersRes.promotions });
 
         setProducts(productRes.products);
         setCombos(comboRes.combos);
@@ -678,7 +688,10 @@ export default function OrderPage() {
 
                   </ul>
 
-                  <div className="cart-total cafe-total"><span>Total</span><strong>₹{existingOrder.amount.toFixed(0)}</strong></div>
+                  <div className="cart-total cafe-total"><span>Total</span><strong>₹{orderGrandTotal(existingOrder).toFixed(0)}</strong></div>
+                  {(existingOrder.tipAmount ?? 0) > 0 && (
+                    <p className="pos-muted promo-line">Tip: ₹{(existingOrder.tipAmount ?? 0).toFixed(0)}</p>
+                  )}
 
                   <button type="button" className="terminal-btn cafe-btn-outline cart-action-btn"
                     onClick={() => setShowReceiptEmail(true)}>
@@ -691,57 +704,71 @@ export default function OrderPage() {
 
                 <>
 
-                  {existingOrder && <p className="pos-muted">#{existingOrder.orderNumber}</p>}
+                  <div className="cart-panel-body">
 
-                  {existingOrder?.promotionName && (
+                    {offers.coupons.length > 0 || offers.promotions.length > 0 ? (
+                      <OffersPanel
+                        coupons={offers.coupons}
+                        promotions={offers.promotions}
+                        activeCouponCode={couponCode || undefined}
+                        onApplyCoupon={existingOrder ? handleApplyCouponWithCode : undefined}
+                        compact
+                      />
+                    ) : null}
 
-                    <p className="pos-muted promo-line">{existingOrder.promotionName}: −₹{existingOrder.discount}</p>
+                    {existingOrder && <p className="pos-muted">#{existingOrder.orderNumber}</p>}
 
-                  )}
+                    {existingOrder?.promotionName && (
 
-                  {cart.length === 0 && <p className="pos-muted">Select items from the menu</p>}
+                      <p className="pos-muted promo-line">{existingOrder.promotionName}: −₹{existingOrder.discount}</p>
 
-                  <ul className="cart-list">
+                    )}
 
-                    {cart.map((line) => (
+                    {cart.length === 0 && <p className="pos-muted">Select items from the menu</p>}
 
-                      <li key={line.product.id}>
+                    <ul className="cart-list">
 
-                        <img src={getFoodImage(line.product.name, line.product.imageUrl)} alt="" className="cart-food-photo" />
+                      {cart.map((line) => (
 
-                        <div className="cart-item-details">
+                        <li key={line.product.id}>
 
-                          <strong>{line.product.name}</strong>
+                          <img src={getFoodImage(line.product.name, line.product.imageUrl)} alt="" className="cart-food-photo" />
 
-                          {getLineDiscount(line.product.id) > 0 && (
-                            <span className="cart-line-promo">−₹{getLineDiscount(line.product.id)} promo</span>
-                          )}
+                          <div className="cart-item-details">
 
-                          <span className="cart-unit-price">₹{line.product.price} each</span>
+                            <strong>{line.product.name}</strong>
 
-                          <div className="qty-controls">
+                            {getLineDiscount(line.product.id) > 0 && (
+                              <span className="cart-line-promo">−₹{getLineDiscount(line.product.id)} promo</span>
+                            )}
 
-                            <button type="button" onClick={() => changeQty(line.product.id, -1)}>−</button>
+                            <span className="cart-unit-price">₹{line.product.price} each</span>
 
-                            <span>{line.quantity}</span>
+                            <div className="qty-controls">
 
-                            <button type="button" onClick={() => changeQty(line.product.id, 1)}>+</button>
+                              <button type="button" onClick={() => changeQty(line.product.id, -1)}>−</button>
+
+                              <span>{line.quantity}</span>
+
+                              <button type="button" onClick={() => changeQty(line.product.id, 1)}>+</button>
+
+                            </div>
 
                           </div>
 
-                        </div>
+                          <span className="cart-line-total">₹{(line.product.price * line.quantity).toFixed(0)}</span>
 
-                        <span className="cart-line-total">₹{(line.product.price * line.quantity).toFixed(0)}</span>
+                        </li>
 
-                      </li>
+                      ))}
 
-                    ))}
+                    </ul>
 
-                  </ul>
+                  </div>
 
                   {cart.length > 0 && (
 
-                    <>
+                    <div className="cart-panel-footer">
 
                       <div className="order-summary">
                         <div className="order-summary-row"><span>Subtotal</span><span>₹{summarySubtotal.toFixed(0)}</span></div>
@@ -795,7 +822,7 @@ export default function OrderPage() {
 
                       )}
 
-                    </>
+                    </div>
 
                   )}
 
@@ -847,6 +874,8 @@ export default function OrderPage() {
         {showDiscount && (
           <DiscountModal
             couponCode={couponCode}
+            coupons={offers.coupons}
+            promotions={offers.promotions}
             onApply={(code) => { setCouponCode(code); handleApplyCouponWithCode(code); }}
             onClose={() => setShowDiscount(false)}
           />

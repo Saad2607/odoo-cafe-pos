@@ -4,6 +4,7 @@ import { Order } from '../models/Order.js';
 import { Product } from '../models/Product.js';
 import { User } from '../models/User.js';
 import { PosSession } from '../models/PosSession.js';
+import { orderGrandTotal, orderTipAmount } from '../utils/orderTotals.js';
 
 const router = Router();
 
@@ -55,7 +56,8 @@ router.get('/', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res
     const orders = await Order.find(filter).sort({ date: -1 });
 
     const totalOrders = orders.length;
-    const revenue = orders.reduce((s, o) => s + o.amount, 0);
+    const totalTips = orders.reduce((s, o) => s + orderTipAmount(o), 0);
+    const revenue = orders.reduce((s, o) => s + orderGrandTotal(o), 0);
     const avgOrder = totalOrders > 0 ? revenue / totalOrders : 0;
 
     const allOrdersFilter: Record<string, unknown> = { status: { $ne: 'CANCELLED' } };
@@ -69,7 +71,7 @@ router.get('/', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res
     for (const o of orders) {
       const key = new Date(o.date).toISOString().slice(0, 10);
       const cur = dayMap.get(key) ?? { revenue: 0, count: 0 };
-      cur.revenue += o.amount;
+      cur.revenue += orderGrandTotal(o);
       cur.count += 1;
       dayMap.set(key, cur);
     }
@@ -106,12 +108,13 @@ router.get('/', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res
 
     const topOrders = orders
       .slice()
-      .sort((a, b) => b.amount - a.amount)
+      .sort((a, b) => orderGrandTotal(b) - orderGrandTotal(a))
       .slice(0, 10)
       .map((o) => ({
         orderNumber: o.orderNumber,
         date: o.date,
-        amount: o.amount,
+        amount: orderGrandTotal(o),
+        tipAmount: orderTipAmount(o),
       }));
 
     const [employees, sessions, allProducts] = await Promise.all([
@@ -125,6 +128,7 @@ router.get('/', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res
         totalOrders,
         allOrderCount,
         revenue: Math.round(revenue),
+        totalTips: Math.round(totalTips),
         avgOrderValue: Math.round(avgOrder),
       },
       salesTrend,

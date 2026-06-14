@@ -1,0 +1,151 @@
+.offers-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.offers-panel--compact {
+  padding: 0.85rem 1rem;
+}
+
+.offers-panel-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.offers-panel-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.offers-panel-head h4 {
+  margin: 0 0 0.15rem;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.offers-panel-head p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.offers-group + .offers-group {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--border);
+}
+
+.offers-group-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--brand);
+}
+
+.offers-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.offers-coupon,
+.offers-promo {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.85rem;
+}
+
+.offers-coupon.active {
+  border-color: var(--brand);
+  background: rgba(158, 75, 58, 0.06);
+}
+
+.offers-coupon-main,
+.offers-promo-main {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.offers-code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  background: var(--brand-gradient);
+  color: var(--text-inverse);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+}
+
+.offers-coupon-main strong,
+.offers-promo-main strong {
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.offers-promo-main em {
+  font-style: normal;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.offers-badge-auto {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--success-bg);
+  color: var(--success);
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-pill);
+}
+
+.offers-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.offers-apply-btn {
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.85rem !important;
+  font-size: 0.78rem !important;
+}
+
+.offers-panel--compact .offers-hint {
+  display: none;
+}
+
+.offers-panel--compact .offers-apply-btn {
+  display: none;
+}
+
+.cafe-floor-page .offers-panel {
+  margin-bottom: 1.25rem;
+}
+
+.discount-modal .offers-panel {
+  margin: 0 0 1rem;
+  box-shadow: none;
+}
+
+.discount-modal {
+  max-width: 480px;
+}

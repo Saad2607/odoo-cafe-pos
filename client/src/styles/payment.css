@@ -13,7 +13,9 @@
   background: #fffaf7;
   border-radius: 20px;
   padding: 1.5rem;
-  width: min(420px, 100%);
+  width: min(440px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 }
 
@@ -41,15 +43,72 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 0.85rem 1rem;
   background: #f5ebe3;
   border-radius: 12px;
+}
+
+.payment-breakdown {
   margin-bottom: 1rem;
 }
 
+.payment-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #5C534A;
+  padding: 0.2rem 0;
+}
+
+.payment-breakdown-tip strong {
+  color: #2e7d32;
+}
+
 .payment-total strong {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   color: #9e4b3a;
+}
+
+.payment-tip-section {
+  margin-bottom: 1rem;
+}
+
+.payment-tip-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #9E4B3A;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.payment-tip-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.payment-tip-btn {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #e8ddd4;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.payment-tip-btn.active {
+  border-color: #9e4b3a;
+  background: #fdf3ee;
+  color: #9e4b3a;
+}
+
+.payment-tip-custom {
+  margin-top: 0.5rem;
+  width: 100%;
 }
 
 .payment-promo {

@@ -6,6 +6,7 @@ import { PosSession } from '../models/PosSession.js';
 import { User } from '../models/User.js';
 import { Order } from '../models/Order.js';
 import { openPosSession } from '../services/session.js';
+import { orderGrandTotal, orderTipAmount } from '../utils/orderTotals.js';
 
 const router = Router();
 
@@ -30,7 +31,8 @@ router.get('/current', authenticate, async (req: AuthRequest, res) => {
 
     const orderCount = await Order.countDocuments(orderFilter);
     const paidOrders = await Order.find({ ...orderFilter, status: 'PAID' });
-    const totalSales = paidOrders.reduce((sum, o) => sum + o.amount, 0);
+    const totalSales = paidOrders.reduce((sum, o) => sum + orderGrandTotal(o), 0);
+    const totalTips = paidOrders.reduce((sum, o) => sum + orderTipAmount(o), 0);
 
     return res.json({
       session: {
@@ -39,6 +41,7 @@ router.get('/current', authenticate, async (req: AuthRequest, res) => {
         lastClosingSale: session.lastClosingSale, orderCount,
         paidOrderCount: paidOrders.length,
         totalSales,
+        totalTips,
         scope: req.user!.role === 'ADMIN' ? 'store' : 'personal',
         user: user ? { id: String(user._id), name: user.name, email: user.email, role: user.role } : null,
       },
@@ -70,7 +73,8 @@ router.post('/close', authenticate, async (req: AuthRequest, res) => {
     }
 
     const paidOrders = await Order.find({ sessionId: session._id, status: 'PAID' });
-    const totalSales = paidOrders.reduce((sum, o) => sum + o.amount, 0);
+    const totalSales = paidOrders.reduce((sum, o) => sum + orderGrandTotal(o), 0);
+    const totalTips = paidOrders.reduce((sum, o) => sum + orderTipAmount(o), 0);
     const draftOrders = await Order.countDocuments({ sessionId: session._id, status: 'DRAFT' });
 
     if (draftOrders > 0) {
@@ -91,6 +95,7 @@ router.post('/close', authenticate, async (req: AuthRequest, res) => {
         sessionNumber: session.sessionNumber,
         orderCount: paidOrders.length,
         totalSales,
+        totalTips,
         closedAt: session.closedAt,
       },
     });

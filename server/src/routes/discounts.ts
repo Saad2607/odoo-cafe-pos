@@ -24,6 +24,72 @@ const promotionSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+function formatDiscountSummary(type: string, value: number) {
+  return type === 'PERCENTAGE' ? `${value}% off` : `₹${value} off`;
+}
+
+function describeCoupon(code: string, type: string, value: number) {
+  return {
+    code,
+    discountType: type,
+    discountValue: value,
+    summary: formatDiscountSummary(type, value),
+    howToUse: `Enter code ${code} when paying — cashier can apply it from Discount / Coupon.`,
+  };
+}
+
+function describePromotion(p: {
+  name: string;
+  triggerType: string;
+  minQuantity?: number | null;
+  minOrderAmount?: number | null;
+  discountType: string;
+  discountValue: number;
+  productName?: string | null;
+}) {
+  const savings = formatDiscountSummary(p.discountType, p.discountValue);
+  let howToUse = 'Applied automatically — no code needed.';
+  if (p.triggerType === 'ORDER' && p.minOrderAmount != null) {
+    howToUse = `Spend ₹${p.minOrderAmount}+ on your order and ${savings} is applied automatically at checkout.`;
+  } else if (p.triggerType === 'PRODUCT' && p.productName && p.minQuantity) {
+    howToUse = `Order ${p.minQuantity}+ × ${p.productName} and ${savings} is applied automatically.`;
+  }
+  return {
+    name: p.name,
+    triggerType: p.triggerType,
+    summary: savings,
+    howToUse,
+    autoApply: true as const,
+  };
+}
+
+/** Active offers for cashiers & customers (no admin role required) */
+router.get('/offers', authenticate, async (_req, res) => {
+  try {
+    const [coupons, promotions] = await Promise.all([
+      Coupon.find({ isActive: true }).sort({ code: 1 }),
+      Promotion.find({ isActive: true }).populate('productId', 'name').sort({ name: 1 }),
+    ]);
+
+    return res.json({
+      coupons: coupons.map((c) => describeCoupon(c.code, c.discountType, c.discountValue)),
+      promotions: promotions.map((p) => describePromotion({
+        name: p.name,
+        triggerType: p.triggerType,
+        minQuantity: p.minQuantity,
+        minOrderAmount: p.minOrderAmount,
+        discountType: p.discountType,
+        discountValue: p.discountValue,
+        productName: p.productId && typeof p.productId === 'object'
+          ? (p.productId as { name?: string }).name
+          : null,
+      })),
+    });
+  } catch {
+    return res.status(500).json({ error: 'Failed to fetch offers' });
+  }
+});
+
 router.get('/coupons', authenticate, requireRole('ADMIN'), async (_req, res) => {
   try {
     const coupons = await Coupon.find().sort({ code: 1 });

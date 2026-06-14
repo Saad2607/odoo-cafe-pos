@@ -1,13 +1,23 @@
 import { useState } from 'react';
+import OffersPanel from './OffersPanel';
+import type { OfferCoupon, OfferPromotion } from '../lib/api';
 import '../styles/payment.css';
 
 interface DiscountModalProps {
   couponCode: string;
+  coupons?: OfferCoupon[];
+  promotions?: OfferPromotion[];
   onApply: (code: string) => void;
   onClose: () => void;
 }
 
-export default function DiscountModal({ couponCode, onApply, onClose }: DiscountModalProps) {
+export default function DiscountModal({
+  couponCode,
+  coupons = [],
+  promotions = [],
+  onApply,
+  onClose,
+}: DiscountModalProps) {
   const [code, setCode] = useState(couponCode);
 
   function handleSubmit(e: React.FormEvent) {
@@ -30,7 +40,18 @@ export default function DiscountModal({ couponCode, onApply, onClose }: Discount
           <h3>Apply Coupon</h3>
           <button type="button" className="payment-close" onClick={onClose}>×</button>
         </header>
-        <p className="pos-muted">Enter a coupon code to apply a discount to this order.</p>
+        <p className="pos-muted">Pick an offer below or enter a coupon code manually.</p>
+        {(coupons.length > 0 || promotions.length > 0) && (
+          <OffersPanel
+            coupons={coupons}
+            promotions={promotions}
+            activeCouponCode={couponCode || undefined}
+            onApplyCoupon={(code) => {
+              onApply(code);
+              onClose();
+            }}
+          />
+        )}
         <input
           className="pill-input"
           placeholder="e.g. WELCOME10"

@@ -7,6 +7,7 @@ export interface SessionCloseSummary {
   sessionNumber: string;
   orderCount: number;
   totalSales: number;
+  totalTips?: number;
   closedAt: string;
 }
 

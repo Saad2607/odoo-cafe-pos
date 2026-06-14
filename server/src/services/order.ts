@@ -40,6 +40,8 @@ export function formatOrder(order: {
 
   discount: number;
 
+  tipAmount?: number;
+
   couponCode?: string;
 
   promotionName?: string;
@@ -125,6 +127,8 @@ export function formatOrder(order: {
     taxAmount: order.taxAmount,
 
     discount: order.discount,
+
+    tipAmount: order.tipAmount ?? 0,
 
     couponCode: order.couponCode ?? null,
 

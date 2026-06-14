@@ -110,6 +110,7 @@ export interface Order {
   subtotal: number;
   taxAmount: number;
   discount: number;
+  tipAmount?: number;
   couponCode?: string | null;
   promotionName?: string | null;
   paymentMethod?: 'CASH' | 'CARD' | 'UPI' | null;
@@ -121,6 +122,10 @@ export interface Order {
   table: { id: string; tableNumber: number } | null;
   customer: { id: string; name: string; email: string | null; phone: string | null } | null;
   items: OrderItem[];
+}
+
+export function orderGrandTotal(order: Pick<Order, 'amount' | 'tipAmount'>) {
+  return order.amount + (order.tipAmount ?? 0);
 }
 
 export interface Customer {
@@ -331,6 +336,7 @@ export async function payOrder(
     couponCode?: string;
     amountReceived?: number;
     cardReference?: string;
+    tipAmount?: number;
   },
 ) {
   return apiFetch<{
@@ -356,6 +362,26 @@ export async function validateCoupon(code: string, subtotal: number, taxAmount: 
   });
 }
 
+export interface OfferCoupon {
+  code: string;
+  discountType: string;
+  discountValue: number;
+  summary: string;
+  howToUse: string;
+}
+
+export interface OfferPromotion {
+  name: string;
+  triggerType: string;
+  summary: string;
+  howToUse: string;
+  autoApply: true;
+}
+
+export async function fetchActiveOffers() {
+  return apiFetch<{ coupons: OfferCoupon[]; promotions: OfferPromotion[] }>('/discounts/offers');
+}
+
 export async function fetchSessionStats() {
   return apiFetch<{
     session: {
@@ -366,6 +392,7 @@ export async function fetchSessionStats() {
       orderCount: number;
       paidOrderCount: number;
       totalSales: number;
+      totalTips?: number;
       lastClosingSale: number | null;
     };
   }>('/session/current');
@@ -378,6 +405,7 @@ export async function closeSession() {
       sessionNumber: string;
       orderCount: number;
       totalSales: number;
+      totalTips?: number;
       closedAt: string;
     };
   }>('/session/close', { method: 'POST' });

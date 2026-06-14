@@ -4,6 +4,7 @@ import { Floor } from '../models/Floor.js';
 import { RestaurantTable } from '../models/RestaurantTable.js';
 import { Order } from '../models/Order.js';
 import { PosSession } from '../models/PosSession.js';
+import { orderGrandTotal } from '../utils/orderTotals.js';
 
 const router = Router();
 
@@ -39,7 +40,7 @@ router.get('/', authenticate, async (req: AuthRequest, res) => {
     }).populate('tableId', 'tableNumber').sort({ date: -1 }).limit(8);
 
     const paidOrders = await Order.find({ sessionId, status: 'PAID' });
-    const totalSales = paidOrders.reduce((s, o) => s + o.amount, 0);
+    const totalSales = paidOrders.reduce((s, o) => s + orderGrandTotal(o), 0);
 
     const recentPaid = await Order.find({ sessionId, status: 'PAID' })
       .sort({ date: -1 })
@@ -74,7 +75,7 @@ router.get('/', authenticate, async (req: AuthRequest, res) => {
       })),
       recentSales: recentPaid.map((o) => ({
         orderNumber: o.orderNumber,
-        amount: o.amount,
+        amount: orderGrandTotal(o),
         date: o.date,
         paymentMethod: o.paymentMethod,
       })),

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
-import { cancelOrder, fetchSessionOrders, getStoredUser, Order } from '../lib/api';
+import { cancelOrder, fetchSessionOrders, getStoredUser, Order, orderGrandTotal } from '../lib/api';
 import { appConfirm } from '../context/DialogContext';
 import '../styles/orders.css';
 
@@ -107,7 +107,7 @@ export default function OrdersPage() {
                     {STATUS_LABELS[order.status]}
                   </span>
                 </div>
-                <strong className="order-amount">₹{order.amount.toFixed(0)}</strong>
+                <strong className="order-amount">₹{orderGrandTotal(order).toFixed(0)}</strong>
               </div>
 
               <div className="order-card-meta">

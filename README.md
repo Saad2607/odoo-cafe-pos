@@ -136,11 +136,14 @@ Copy `server/.env.example` to `server/.env`:
 | Admin | admin@cafe.com | admin123 | `/dashboard` |
 | Cashier | cashier@cafe.com | cashier123 | `/floor` |
 
-### Demo coupon
+### Demo offers
 
-| Code | Discount |
-|------|----------|
-| `WELCOME10` | 10% off order total |
+Cashiers and customers see active offers on the **Floor Plan** and in the **order cart** (Today's Offers panel). Coupons can be applied with one tap from the cart or via **Discount / Coupon** at checkout.
+
+| Type | Name / Code | Savings | How it applies |
+|------|-------------|---------|----------------|
+| Coupon | `WELCOME10` | 10% off order total | Enter code at checkout — cashier applies from Discount / Coupon |
+| Auto promo | Big Order Discount | ₹50 off | Spend ₹700+ — applied automatically, no code needed |
 
 ---
 
@@ -182,6 +185,7 @@ Admin views Dashboard / Reports / Live Ops
 | GET | `/api/reports` | Sales reports (admin) |
 | GET | `/api/customers` | Customers |
 | POST | `/api/coupons/validate` | Validate coupon |
+| GET | `/api/discounts/offers` | Active coupons & promotions (cashier) |
 | CRUD | `/api/users` | User management (admin) |
 
 ---

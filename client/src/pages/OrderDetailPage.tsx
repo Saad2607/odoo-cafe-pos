@@ -8,6 +8,7 @@ import {
   Order,
   Product,
   updateDraftOrder,
+  orderGrandTotal,
 } from '../lib/api';
 import { appConfirm } from '../context/DialogContext';
 import '../styles/orders.css';
@@ -105,7 +106,7 @@ export default function OrderDetailPage() {
                   {STATUS_LABELS[order.status]}
                 </span>
               </div>
-              <strong className="order-amount">₹{order.amount.toFixed(0)}</strong>
+              <strong className="order-amount">₹{orderGrandTotal(order).toFixed(0)}</strong>
             </div>
 
             <div className="order-card-meta">
@@ -123,6 +124,7 @@ export default function OrderDetailPage() {
                 {order.discount > 0 && <p>Discount: −₹{order.discount.toFixed(0)}</p>}
                 {order.couponCode && <p>Coupon: {order.couponCode}</p>}
                 {order.promotionName && <p>Promotion: {order.promotionName}</p>}
+                {(order.tipAmount ?? 0) > 0 && <p>Tip: ₹{(order.tipAmount ?? 0).toFixed(0)}</p>}
                 {order.changeDue != null && order.changeDue > 0 && (
                   <p>Change: ₹{order.changeDue.toFixed(0)}</p>
                 )}
