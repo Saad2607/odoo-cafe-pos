@@ -40,7 +40,7 @@ Full-stack **Point of Sale** system for cafe and restaurant operations — built
 
 ### Cashier Operations
 - **Floor Plan** — table grid with FREE / OCCUPIED status
-- **Order Taking** — full menu, search, combos, smart pairings
+- **Order Taking** — full menu, search, combos
 - **Kitchen Display (KDS)** — live queue, tap-to-advance stages
 - **Payments** — Cash, Card, UPI + coupons & promotions
 - **End Shift** — cashier closes session with sales summary

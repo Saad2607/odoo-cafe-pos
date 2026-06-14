@@ -11,7 +11,6 @@ import ReceiptPrint from '../components/ReceiptPrint';
 import DiscountModal from '../components/DiscountModal';
 import OffersPanel from '../components/OffersPanel';
 import ReceiptEmailModal from '../components/ReceiptEmailModal';
-import SmartPairingToast from '../components/SmartPairingToast';
 import ConfettiBurst from '../components/ConfettiBurst';
 
 import { getFoodImage } from '../lib/foodImages';
@@ -113,7 +112,6 @@ export default function OrderPage() {
 
   const [showCustomerPicker, setShowCustomerPicker] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [pairingProduct, setPairingProduct] = useState<Product | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [combos, setCombos] = useState<ComboMeal[]>([]);
 
@@ -233,8 +231,6 @@ export default function OrderPage() {
       return [...prev, { product, quantity: 1 }];
 
     });
-
-    setPairingProduct(product);
 
   }
 
@@ -464,7 +460,7 @@ export default function OrderPage() {
 
         <header className="cafe-order-header">
           <h2>Place Order</h2>
-          <p>{products.length} items · combos & smart pairings</p>
+          <p>{products.length} items · combos</p>
         </header>
 
 
@@ -889,12 +885,6 @@ export default function OrderPage() {
           />
         )}
 
-        <SmartPairingToast
-          product={pairingProduct}
-          allProducts={products}
-          onAdd={addToCart}
-          onDismiss={() => setPairingProduct(null)}
-        />
 
         <ConfettiBurst active={showConfetti} />
 
