@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 import { Order } from '../models/Order.js';
+import { PosSession } from '../models/PosSession.js';
 
 import { getPaymentSettings } from '../models/PaymentSettings.js';
 
@@ -69,7 +70,17 @@ router.get('/session', authenticate, async (req: AuthRequest, res) => {
     const q = (req.query.q as string | undefined)?.trim();
     const date = req.query.date as string | undefined;
 
-    const filter: Record<string, unknown> = { sessionId: req.user!.sessionId };
+    const filter: Record<string, unknown> = {};
+
+    if (req.user!.role === 'ADMIN') {
+      const openSessions = await PosSession.find({ status: 'OPEN' }).select('_id');
+      const sessionIds = openSessions.map((s) => s._id);
+      filter.sessionId = sessionIds.length > 0
+        ? { $in: sessionIds }
+        : req.user!.sessionId;
+    } else {
+      filter.sessionId = req.user!.sessionId;
+    }
 
     if (date) {
       const d = new Date(date);

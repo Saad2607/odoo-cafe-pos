@@ -9,6 +9,7 @@ import {
   Product,
   updateDraftOrder,
 } from '../lib/api';
+import { appConfirm } from '../context/DialogContext';
 import '../styles/orders.css';
 
 const STATUS_LABELS: Record<Order['status'], string> = {
@@ -71,7 +72,13 @@ export default function OrderDetailPage() {
   }
 
   async function handleCancel() {
-    if (!order || !confirm('Cancel this draft order?')) return;
+    if (!order) return;
+    const ok = await appConfirm('Cancel this draft order?', {
+      title: 'Cancel order',
+      confirmLabel: 'Cancel Order',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await cancelOrder(order.id);
       navigate('/orders');

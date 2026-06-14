@@ -12,6 +12,7 @@ import {
   Category,
   updateProduct,
 } from '../lib/api';
+import { appConfirm } from '../context/DialogContext';
 import '../styles/pos.css';
 import '../styles/menu-explorer.css';
 
@@ -131,7 +132,12 @@ export default function AdminProductsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Deactivate this product?')) return;
+    const ok = await appConfirm('Deactivate this product?', {
+      title: 'Deactivate product',
+      confirmLabel: 'Deactivate',
+      variant: 'warning',
+    });
+    if (!ok) return;
     try {
       await deleteProduct(id);
       setMessage('Product deactivated');
@@ -144,6 +150,11 @@ export default function AdminProductsPage() {
   return (
     <AppLayout title="Menu Admin" subtitle={`${total} products · paginated catalog`}>
       <div className="pos-page admin-page">
+        <section className="page-hero">
+          <h2>Menu Admin</h2>
+          <p>{total} products across {categories.length} categories — add, edit, and paginate the catalog</p>
+        </section>
+
         {error && <div className="pos-error">{error}</div>}
         {message && <div className="pos-success">{message}</div>}
 

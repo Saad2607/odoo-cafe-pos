@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import FloorPopup, { clearFloorPopupFlag, shouldShowFloorPopup } from '../components/FloorPopup';
 import PosSessionCard from '../components/PosSessionCard';
-import { fetchFloors, fetchSessionStats, Floor } from '../lib/api';
+import SessionCloseModal from '../components/SessionCloseModal';
+import { useCloseSession } from '../hooks/useCloseSession';
+import { fetchFloors, fetchSessionStats, getStoredUser, Floor } from '../lib/api';
 import '../styles/pos.css';
 import '../styles/floor-plan.css';
 import '../styles/session-terminal.css';
@@ -11,6 +13,9 @@ import '../styles/session-terminal.css';
 export default function FloorPlanPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const user = getStoredUser();
+  const isCashier = user?.role === 'EMPLOYEE';
+  const { closing, closeSummary, handleCloseSession, finishCloseSession } = useCloseSession();
   const [floors, setFloors] = useState<Floor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -48,8 +53,36 @@ export default function FloorPlanPage() {
   }
 
   return (
-    <AppLayout title="Table View" subtitle="Floor plan & table selection">
+    <AppLayout title="Table View" subtitle="Cashier · Floor & orders">
       <div className="pos-page cafe-floor-page">
+        <section className="page-hero">
+          <h2>Floor Plan</h2>
+          <p>Select a table to start or continue an order · Session {session.sessionNumber || '—'}</p>
+        </section>
+
+        <div className="cashier-quick-strip">
+          <Link to="/orders" className="cashier-quick-card">
+            <strong>{session.orderCount}</strong>
+            <span>Orders</span>
+            <em>View all orders</em>
+          </Link>
+          <Link to="/kitchen" className="cashier-quick-card">
+            <strong>KDS</strong>
+            <span>Kitchen</span>
+            <em>Live kitchen board</em>
+          </Link>
+          <Link to="/menu-explorer" className="cashier-quick-card">
+            <strong>500+</strong>
+            <span>Menu</span>
+            <em>Browse catalog</em>
+          </Link>
+          <div className="cashier-quick-card" style={{ cursor: 'default' }}>
+            <strong>₹{session.totalSales.toFixed(0)}</strong>
+            <span>Sales</span>
+            <em>This session</em>
+          </div>
+        </div>
+
         <PosSessionCard
           sessionNumber={session.sessionNumber}
           openedAt={session.openedAt}
@@ -58,6 +91,24 @@ export default function FloorPlanPage() {
           orderCount={session.orderCount}
           onOpenSession={() => setShowPopup(true)}
         />
+
+        {isCashier && (
+          <section className="floor-end-shift">
+            <div className="floor-end-shift-copy">
+              <strong>End of day?</strong>
+              <p>Close your session after all orders are paid or cancelled. This locks today&apos;s sales totals.</p>
+            </div>
+            <button
+              type="button"
+              className="terminal-btn floor-end-shift-btn"
+              onClick={() => handleCloseSession()}
+              disabled={closing}
+            >
+              {closing ? 'Closing…' : 'End Shift — Close Session'}
+            </button>
+          </section>
+        )}
+
         <p className="pos-muted floor-hint">
           Tap a table to open the order view. Occupied tables are highlighted.
         </p>
@@ -94,6 +145,10 @@ export default function FloorPlanPage() {
 
       {showPopup && floors.length > 0 && (
         <FloorPopup floors={floors} onClose={closePopup} />
+      )}
+
+      {closeSummary && (
+        <SessionCloseModal summary={closeSummary} onDone={finishCloseSession} />
       )}
     </AppLayout>
   );

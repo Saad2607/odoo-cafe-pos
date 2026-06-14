@@ -94,6 +94,13 @@ export default function KitchenPage({ standalone }: KitchenPageProps) {
 
   const body = (
     <div className={`pos-page kitchen-page${standalone ? ' kds-standalone-page' : ''}`}>
+      {!standalone && (
+        <section className="page-hero">
+          <h2>Kitchen Display</h2>
+          <p>Live order queue — tap tickets to advance, tap items to mark done</p>
+        </section>
+      )}
+
       <div className="kitchen-live-header">
         <span className="kds-live-badge"><span className="live-dot" /> LIVE</span>
         <span className="kitchen-live-sub">Real-time updates every 2s</span>

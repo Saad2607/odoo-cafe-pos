@@ -2,7 +2,6 @@ import { ReactNode, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   clearAuth,
-  closeSession,
   fetchProducts,
   getCurrentTable,
   getStoredUser,
@@ -10,6 +9,9 @@ import {
 } from '../lib/api';
 import { markFloorPopupForSession } from './FloorPopup';
 import SessionCloseModal from './SessionCloseModal';
+import { appConfirm } from '../context/DialogContext';
+import { useCloseSession } from '../hooks/useCloseSession';
+import { useSessionOpen } from '../hooks/useSessionOpen';
 import '../styles/app-layout.css';
 
 interface AppLayoutProps {
@@ -50,13 +52,8 @@ export default function AppLayout({ children, subtitle, hideNav }: AppLayoutProp
   const [products, setProducts] = useState<Product[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [currentTable, setCurrentTableState] = useState<number | null>(getCurrentTable());
-  const [closing, setClosing] = useState(false);
-  const [closeSummary, setCloseSummary] = useState<{
-    sessionNumber: string;
-    orderCount: number;
-    totalSales: number;
-    closedAt: string;
-  } | null>(null);
+  const { closing, closeSummary, handleCloseSession, finishCloseSession } = useCloseSession();
+  const { refreshSessionOpen } = useSessionOpen(location.pathname);
   const searchRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -99,29 +96,38 @@ export default function AppLayout({ children, subtitle, hideNav }: AppLayoutProp
     setUserMenuOpen(false);
   }, [location.pathname]);
 
-  function handleLogout() {
-    clearAuth();
-    navigate('/login', { replace: true });
-  }
-
-  async function handleCloseSession() {
-    if (!confirm('Close this POS session and end your shift?')) return;
-    setClosing(true);
+  async function handleLogout() {
     setUserMenuOpen(false);
-    try {
-      const res = await closeSession();
-      setCloseSummary(res.summary);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to close session');
-    } finally {
-      setClosing(false);
-    }
-  }
+    setMenuOpen(false);
 
-  function finishCloseSession() {
-    setCloseSummary(null);
+    if (user?.role === 'EMPLOYEE') {
+      const open = await refreshSessionOpen();
+      if (open) {
+        const closeFirst = await appConfirm(
+          'Close your session and end your shift now? (Recommended)\n\nAll orders must be paid or cancelled first.',
+          { title: 'Session still open', confirmLabel: 'End Shift', cancelLabel: 'Stay signed in', variant: 'warning' },
+        );
+        if (closeFirst) {
+          await handleCloseSession({ skipConfirm: true });
+          return;
+        }
+
+        const signOutAnyway = await appConfirm(
+          'Unsettled orders should be paid or cancelled before the next shift close.',
+          { title: 'Sign out without closing?', confirmLabel: 'Sign Out', cancelLabel: 'Stay signed in', variant: 'danger' },
+        );
+        if (!signOutAnyway) return;
+      }
+    }
+
     clearAuth();
     navigate('/login', { replace: true });
+  }
+
+  async function onCloseSessionClick() {
+    setUserMenuOpen(false);
+    setMenuOpen(false);
+    await handleCloseSession();
   }
 
   if (!user) {
@@ -130,6 +136,7 @@ export default function AppLayout({ children, subtitle, hideNav }: AppLayoutProp
   }
 
   const isAdmin = user.role === 'ADMIN';
+  const isCashier = user.role === 'EMPLOYEE';
   const initials = user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
   function handleNavClick() {
@@ -165,7 +172,7 @@ export default function AppLayout({ children, subtitle, hideNav }: AppLayoutProp
             <span /><span /><span />
           </button>
           <div className="app-brand">
-            <img src="/cafe.svg" alt="" className="app-brand-logo" width={32} height={32} />
+            <img src="/cafe.svg" alt="" className="app-brand-logo" width={44} height={44} />
             <div>
               <h1>Brivio</h1>
               <span>{subtitle || 'Odoo Cafe POS'}</span>
@@ -255,16 +262,16 @@ export default function AppLayout({ children, subtitle, hideNav }: AppLayoutProp
                   {item.label}
                 </Link>
               ))}
-              {isAdmin && (
+              {isCashier && (
                 <>
                   <div className="app-user-dropdown-divider" />
                   <button
                     type="button"
                     className="app-user-dropdown-action danger"
-                    onClick={handleCloseSession}
+                    onClick={onCloseSessionClick}
                     disabled={closing}
                   >
-                    {closing ? 'Closing…' : 'Close Session'}
+                    {closing ? 'Closing…' : 'End Shift'}
                   </button>
                 </>
               )}
@@ -272,7 +279,7 @@ export default function AppLayout({ children, subtitle, hideNav }: AppLayoutProp
               <button
                 type="button"
                 className="app-user-dropdown-action"
-                onClick={() => { setUserMenuOpen(false); handleLogout(); }}
+                onClick={handleLogout}
               >
                 Sign Out
               </button>
@@ -332,14 +339,14 @@ export default function AppLayout({ children, subtitle, hideNav }: AppLayoutProp
             )}
 
             <div className="app-drawer-footer">
-              {isAdmin && (
+              {isCashier && (
                 <button
                   type="button"
                   className="app-drawer-end-shift"
-                  onClick={handleCloseSession}
+                  onClick={onCloseSessionClick}
                   disabled={closing}
                 >
-                  {closing ? 'Closing…' : 'Close Session'}
+                  {closing ? 'Closing…' : 'End Shift'}
                 </button>
               )}
               <button type="button" className="app-drawer-signout" onClick={handleLogout}>

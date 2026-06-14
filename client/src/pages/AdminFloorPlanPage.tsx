@@ -9,6 +9,7 @@ import {
   updateTable,
   AdminFloor,
 } from '../lib/api';
+import { appConfirm } from '../context/DialogContext';
 import '../styles/floor-plan.css';
 
 export default function AdminFloorPlanPage() {
@@ -70,7 +71,12 @@ export default function AdminFloorPlanPage() {
   }
 
   async function handleDeleteTable(tableId: string) {
-    if (!confirm('Remove this table?')) return;
+    const ok = await appConfirm('Remove this table?', {
+      title: 'Remove table',
+      confirmLabel: 'Remove',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await deleteTable(tableId);
       setMessage('Table removed');
@@ -81,7 +87,12 @@ export default function AdminFloorPlanPage() {
   }
 
   async function handleDeleteFloor(floorId: string) {
-    if (!confirm('Delete this floor? All tables must be removed first.')) return;
+    const ok = await appConfirm('Delete this floor? All tables must be removed first.', {
+      title: 'Delete floor',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await deleteFloor(floorId);
       setMessage('Floor deleted');
@@ -94,6 +105,11 @@ export default function AdminFloorPlanPage() {
   return (
     <AppLayout title="Floor Plan Admin" subtitle="Create floors & tables">
       <div className="admin-floor-page">
+        <section className="page-hero">
+          <h2>Floor Plan Setup</h2>
+          <p>Create floors, add tables, and configure seating layout</p>
+        </section>
+
         <form className="admin-floor-toolbar" onSubmit={handleCreateFloor}>
           <input
             className="pill-input"

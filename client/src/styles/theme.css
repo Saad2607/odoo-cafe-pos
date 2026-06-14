@@ -1,0 +1,43 @@
+/* Brivio Cafe — design tokens */
+:root {
+  --brand: #9E4B3A;
+  --brand-dark: #7A3628;
+  --brand-light: #C4785A;
+  --brand-gradient: linear-gradient(135deg, #9E4B3A 0%, #8A3F30 100%);
+  --brand-shadow: 0 4px 20px rgba(158, 75, 58, 0.22);
+
+  --bg: #F3EDE4;
+  --bg-warm: #EBE3D8;
+  --surface: #FDFBF7;
+  --surface-elevated: #FFFFFF;
+  --surface-glass: rgba(255, 255, 255, 0.72);
+
+  --text: #1F1A17;
+  --text-secondary: #5C534A;
+  --text-muted: #7A7268;
+  --text-inverse: #FDFBF7;
+
+  --border: #E8DFD4;
+  --border-strong: #D4C9BC;
+
+  --success: #2E7D32;
+  --success-bg: #E8F5E9;
+  --warning: #E65100;
+  --warning-bg: #FFF3E0;
+  --danger: #C62828;
+  --danger-bg: #FFEBEE;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 2px 8px rgba(31, 26, 23, 0.06);
+  --shadow-md: 0 8px 24px rgba(31, 26, 23, 0.08);
+  --shadow-lg: 0 16px 40px rgba(31, 26, 23, 0.12);
+
+  --header-h: 68px;
+  --page-pad: 1.75rem 2rem 2.5rem;
+  --transition: 0.2s ease;
+}

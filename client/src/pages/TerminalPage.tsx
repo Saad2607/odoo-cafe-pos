@@ -7,6 +7,7 @@ import {
   fetchSessionStats,
   getStoredUser,
 } from '../lib/api';
+import { appConfirm } from '../context/DialogContext';
 import '../styles/terminal.css';
 import '../styles/pos.css';
 
@@ -32,7 +33,12 @@ export default function TerminalPage() {
   }, []);
 
   async function handleCloseSession() {
-    if (!confirm('Close this POS session? All orders must be paid first.')) return;
+    const ok = await appConfirm('All orders must be paid or cancelled before closing.', {
+      title: 'Close POS session?',
+      confirmLabel: 'Close Session',
+      variant: 'warning',
+    });
+    if (!ok) return;
     setClosing(true);
     setError('');
     try {

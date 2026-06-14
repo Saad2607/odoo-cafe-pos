@@ -15,8 +15,21 @@ router.get('/current', authenticate, async (req: AuthRequest, res) => {
     if (!session) return res.status(404).json({ error: 'Session not found' });
 
     const user = await User.findById(session.userId).select('name email role');
-    const orderCount = await Order.countDocuments({ sessionId: session._id });
-    const paidOrders = await Order.find({ sessionId: session._id, status: 'PAID' });
+
+    let sessionIds: unknown[] = [session._id];
+    if (req.user!.role === 'ADMIN') {
+      const openSessions = await PosSession.find({ status: 'OPEN' }).select('_id');
+      if (openSessions.length > 0) {
+        sessionIds = openSessions.map((s) => s._id);
+      }
+    }
+
+    const orderFilter = sessionIds.length === 1
+      ? { sessionId: sessionIds[0] }
+      : { sessionId: { $in: sessionIds } };
+
+    const orderCount = await Order.countDocuments(orderFilter);
+    const paidOrders = await Order.find({ ...orderFilter, status: 'PAID' });
     const totalSales = paidOrders.reduce((sum, o) => sum + o.amount, 0);
 
     return res.json({
@@ -26,6 +39,7 @@ router.get('/current', authenticate, async (req: AuthRequest, res) => {
         lastClosingSale: session.lastClosingSale, orderCount,
         paidOrderCount: paidOrders.length,
         totalSales,
+        scope: req.user!.role === 'ADMIN' ? 'store' : 'personal',
         user: user ? { id: String(user._id), name: user.name, email: user.email, role: user.role } : null,
       },
     });

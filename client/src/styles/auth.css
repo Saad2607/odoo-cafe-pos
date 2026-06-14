@@ -69,19 +69,53 @@
 }
 
 .auth-hero-tagline {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #7A7268;
-  line-height: 1.55;
-  max-width: 320px;
+  line-height: 1.6;
+  max-width: 340px;
+  margin-bottom: 1rem;
+}
+
+.auth-hero-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.auth-hero-features li {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding-left: 1.25rem;
+  position: relative;
+}
+
+.auth-hero-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--brand);
+  font-weight: 800;
+}
+
+.auth-page--coffee .auth-hero-features li {
+  color: rgba(253, 251, 247, 0.88);
+}
+
+.auth-page--coffee .auth-hero-features li::before {
+  color: #FDFBF7;
 }
 
 .auth-card {
   width: 100%;
-  background: #FDFBF7;
-  border: 1px solid #E8DFD4;
-  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 2rem 2rem 1.75rem;
-  box-shadow: 0 8px 24px rgba(158, 75, 58, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .auth-logo {
@@ -92,9 +126,9 @@
 }
 
 .auth-logo-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
   background: #F5F0E8;
   border: 1px solid #E8DFD4;
   display: flex;
@@ -104,8 +138,8 @@
 }
 
 .auth-logo-icon img {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
 }
 
 .auth-logo h1 {
@@ -150,7 +184,7 @@
   display: block;
   font-size: 0.68rem;
   font-weight: 800;
-  color: white;
+  color: var(--text-muted);
   margin-bottom: 0.4rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;

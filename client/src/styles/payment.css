@@ -34,7 +34,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #6b4e71;
+  color: #9E4B3A;
 }
 
 .payment-total {
@@ -84,7 +84,7 @@
   display: block;
   margin-bottom: 0.35rem;
   font-size: 0.85rem;
-  color: #6b4e71;
+  color: #9E4B3A;
 }
 
 .payment-change {

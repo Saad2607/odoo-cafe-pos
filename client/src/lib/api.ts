@@ -522,7 +522,7 @@ export async function deletePromotion(id: string) {
 }
 
 export interface ReportData {
-  metrics: { totalOrders: number; revenue: number; avgOrderValue: number };
+  metrics: { totalOrders: number; allOrderCount: number; revenue: number; avgOrderValue: number };
   salesTrend: Array<{ date: string; revenue: number; orders: number }>;
   topProducts: Array<{ name: string; qty: number; revenue: number }>;
   topCategories: Array<{ name: string; revenue: number }>;

@@ -96,6 +96,11 @@ export default function ReportsPage() {
   return (
     <AppLayout title="Reports" subtitle="Sales analytics">
       <div className="reports-page">
+        <section className="page-hero">
+          <h2>Sales Reports</h2>
+          <p>Revenue trends, top products, and exportable analytics</p>
+        </section>
+
         <div className="reports-toolbar no-print">
           <label className="reports-check">
             <input type="checkbox" checked={useCustomRange} onChange={(e) => setUseCustomRange(e.target.checked)} />

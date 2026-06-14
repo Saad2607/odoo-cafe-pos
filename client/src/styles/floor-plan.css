@@ -1,5 +1,4 @@
-.floor-popup-overlay {
-  position: fixed;
+.floor-popup-overlay {  position: fixed;
   inset: 0;
   background: rgba(44, 36, 32, 0.55);
   display: flex;
@@ -137,6 +136,58 @@
 .floor-table-btn .badge.occupied {
   background: #FFF3E0;
   color: #E65100;
+}
+
+/* Cashier end-of-shift panel on floor plan */
+.floor-end-shift {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin: 1.25rem 0 1.5rem;
+  padding: 1.15rem 1.35rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+}
+
+.floor-end-shift-copy strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.floor-end-shift-copy p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+.floor-end-shift-btn {
+  background: var(--brand-gradient) !important;
+  color: var(--text-inverse) !important;
+  border: none !important;
+  box-shadow: var(--brand-shadow);
+  white-space: nowrap;
+}
+
+.floor-end-shift-btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.floor-end-shift-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.floor-hint {
+  margin-bottom: 1rem;
 }
 
 /* Admin floor plan page */

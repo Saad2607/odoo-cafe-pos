@@ -11,6 +11,7 @@ import {
   restoreUser,
   User,
 } from '../lib/api';
+import { appConfirm } from '../context/DialogContext';
 import '../styles/pos.css';
 
 const emptyForm = { name: '', email: '', password: '', role: 'EMPLOYEE' as User['role'] };
@@ -74,7 +75,12 @@ export default function AdminUsersPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Permanently delete this user?')) return;
+    const ok = await appConfirm('Permanently delete this user?', {
+      title: 'Delete user',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await deleteUser(id);
       setMessage('User deleted');
@@ -87,6 +93,11 @@ export default function AdminUsersPage() {
   return (
     <AppLayout title="Users" subtitle="Employees & admins">
       <div className="pos-page admin-page">
+        <section className="page-hero">
+          <h2>Team & Users</h2>
+          <p>Manage cashier and admin accounts for your cafe</p>
+        </section>
+
         {loading && <p className="pos-muted">Loading…</p>}
         {error && <div className="pos-error">{error}</div>}
         {message && <div className="pos-success">{message}</div>}

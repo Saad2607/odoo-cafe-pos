@@ -1,20 +1,20 @@
 .terminal-page {
   min-height: 100vh;
-  background: #f5f2ed;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
 }
 
 .terminal-header {
-  background: linear-gradient(135deg, #3D405B 0%, #5c5f7a 100%);
-  color: white;
+  background: var(--brand-gradient);
+  color: var(--text-inverse);
   padding: 1rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  box-shadow: 0 2px 12px rgba(61, 64, 91, 0.2);
+  box-shadow: var(--brand-shadow);
 }
 
 .terminal-nav {
@@ -24,19 +24,20 @@
 }
 
 .terminal-nav-link {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.88);
   text-decoration: none;
   padding: 0.45rem 1rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.85rem;
   font-weight: 600;
   border: 1px solid transparent;
+  transition: var(--transition);
 }
 
 .terminal-nav-link:hover,
 .terminal-nav-link.active {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .terminal-main {
@@ -57,14 +58,19 @@
 }
 
 .terminal-brand-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: white;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
+}
+
+.terminal-brand-icon img {
+  width: 38px;
+  height: 38px;
 }
 
 .terminal-brand h1 {
@@ -74,7 +80,7 @@
 
 .terminal-brand span {
   font-size: 0.7rem;
-  opacity: 0.7;
+  opacity: 0.75;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -96,7 +102,7 @@
 
 .terminal-user-role {
   font-size: 0.75rem;
-  opacity: 0.7;
+  opacity: 0.75;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -105,29 +111,29 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #E07A5F, #F2CC8F);
+  background: linear-gradient(135deg, var(--brand-light), #F2CC8F);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 1rem;
-  color: #3D405B;
+  color: var(--text);
 }
 
 .terminal-logout {
   padding: 0.5rem 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-pill);
   background: transparent;
-  color: white;
+  color: var(--text-inverse);
   font-family: inherit;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--transition);
 }
 
 .terminal-logout:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .terminal-body {
@@ -139,13 +145,14 @@
 }
 
 .terminal-welcome {
-  background: white;
-  border-radius: 24px;
+  background: var(--surface);
+  border-radius: var(--radius-xl);
   padding: 3rem;
   max-width: 640px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 4px 24px rgba(61, 64, 91, 0.06);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
 }
 
 .terminal-welcome-icon {
@@ -155,28 +162,28 @@
 
 .terminal-welcome h2 {
   font-size: 1.75rem;
-  color: #3D405B;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .terminal-welcome p {
-  color: #8a8494;
+  color: var(--text-muted);
   margin-bottom: 2rem;
 }
 
 .session-card {
-  background: #faf8f5;
-  border-radius: 20px;
+  background: var(--bg-warm);
+  border-radius: var(--radius-lg);
   padding: 1.5rem 2rem;
   text-align: left;
-  border: 1px solid #e8e0d8;
+  border: 1px solid var(--border);
 }
 
 .session-card h3 {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #6B4E71;
+  color: var(--brand);
   margin-bottom: 1rem;
 }
 
@@ -185,11 +192,11 @@
   justify-content: space-between;
   padding: 0.5rem 0;
   font-size: 0.95rem;
-  color: #3D405B;
+  color: var(--text);
 }
 
 .session-detail span:first-child {
-  color: #8a8494;
+  color: var(--text-muted);
 }
 
 .session-status {
@@ -197,9 +204,9 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  background: #e8f5e9;
-  color: #2e7d32;
+  border-radius: var(--radius-pill);
+  background: var(--success-bg);
+  color: var(--success);
   font-size: 0.8rem;
   font-weight: 600;
 }
@@ -209,7 +216,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #4caf50;
+  background: var(--success);
 }
 
 .terminal-actions {
@@ -221,46 +228,47 @@
 
 .terminal-btn {
   padding: 0.875rem 2rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   border: none;
-  transition: all 0.2s;
+  transition: var(--transition);
 }
 
 .terminal-btn-primary,
 a.terminal-btn-primary {
-  background: linear-gradient(135deg, #6B4E71, #8B6B91);
-  color: white;
-  box-shadow: 0 4px 16px rgba(107, 78, 113, 0.25);
+  background: var(--brand-gradient);
+  color: var(--text-inverse);
+  box-shadow: var(--brand-shadow);
   text-decoration: none;
 }
 
 .terminal-btn-primary:hover {
   transform: translateY(-1px);
+  filter: brightness(1.05);
 }
 
 .terminal-btn-secondary,
 a.terminal-btn-secondary {
-  background: white;
-  color: #6B4E71;
-  border: 2px solid #e8e0d8;
+  background: var(--surface);
+  color: var(--brand);
+  border: 2px solid var(--border);
   text-decoration: none;
 }
 
 .terminal-btn-secondary:hover {
-  border-color: #6B4E71;
+  border-color: var(--brand);
 }
 
 .checkpoint-badge {
   margin-top: 2rem;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
-  border-radius: 999px;
+  background: var(--success-bg);
+  border-radius: var(--radius-pill);
   font-size: 0.85rem;
-  color: #2e7d32;
+  color: var(--success);
   font-weight: 500;
   display: inline-flex;
   align-items: center;
@@ -275,22 +283,22 @@ a.terminal-btn-secondary {
 }
 
 .stat-card {
-  background: #faf8f5;
-  border-radius: 16px;
+  background: var(--bg-warm);
+  border-radius: var(--radius-md);
   padding: 1rem;
-  border: 1px solid #e8e0d8;
+  border: 1px solid var(--border);
 }
 
 .stat-value {
   display: block;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #6B4E71;
+  color: var(--brand);
 }
 
 .stat-label {
   font-size: 0.75rem;
-  color: #8a8494;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -298,17 +306,18 @@ a.terminal-btn-secondary {
 .terminal-btn-close {
   margin-top: 1rem;
   background: transparent;
-  color: #c62828;
+  color: var(--danger);
   border: 2px solid #ffcdd2;
   padding: 0.75rem 1.5rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-family: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition: var(--transition);
 }
 
 .terminal-btn-close:hover:not(:disabled) {
-  background: #ffebee;
+  background: var(--danger-bg);
 }
 
 .terminal-btn-close:disabled {

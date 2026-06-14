@@ -9,9 +9,10 @@
   gap: 1rem 1.5rem;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.25rem;
-  background: linear-gradient(135deg, #3d2317 0%, #6b3d2e 50%, #9e4b3a 100%);
-  border-radius: 16px;
-  color: #fff;
+  background: var(--brand-gradient);
+  border-radius: var(--radius-lg);
+  color: var(--text-inverse);
+  box-shadow: var(--brand-shadow);
 }
 
 .explorer-stat {
@@ -234,9 +235,10 @@
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #1a472a 0%, #2e7d32 100%);
-  border-radius: 16px;
-  color: #fff;
+  background: var(--brand-gradient);
+  border-radius: var(--radius-lg);
+  color: var(--text-inverse);
+  box-shadow: var(--brand-shadow);
 }
 
 .dash-catalog-banner p {

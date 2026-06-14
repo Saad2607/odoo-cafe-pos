@@ -1,0 +1,171 @@
+/* Global UI refresh — shared patterns for admin + cashier */
+
+/* Page shells */
+.pos-page,
+.dashboard-page,
+.orders-page,
+.customers-page,
+.reports-page,
+.menu-explorer-page,
+.admin-page,
+.admin-settings-page,
+.admin-floor-page,
+.live-ops-page {
+  animation: ui-fade-in 0.45s ease;
+}
+
+@keyframes ui-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-hero {
+  margin-bottom: 1.75rem;
+  padding: 1.5rem 1.75rem;
+  background: var(--brand-gradient);
+  border-radius: var(--radius-lg);
+  color: var(--text-inverse);
+  box-shadow: var(--brand-shadow);
+}
+
+.page-hero h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.35rem;
+}
+
+.page-hero p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+/* POS legacy palette → cafe tokens */
+.pos-muted { color: var(--text-muted) !important; }
+.pos-link { color: var(--brand) !important; }
+
+.floor-section h2,
+.floor-name,
+.menu-category h3,
+.admin-list h3,
+.admin-form h3,
+.pos-page > h2 {
+  color: var(--text) !important;
+}
+
+.menu-category h3 {
+  border-left-color: var(--brand) !important;
+}
+
+.table-card,
+.menu-panel,
+.cart-panel,
+.admin-form,
+.admin-list,
+.product-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.table-card:hover {
+  box-shadow: var(--shadow-md) !important;
+  border-color: var(--brand-light) !important;
+}
+
+.table-number { color: var(--text) !important; }
+.table-seats { color: var(--text-muted) !important; }
+
+.table-card.table-free { border-color: #A5D6A7 !important; }
+.table-card.table-occupied {
+  border-color: #FFCC80 !important;
+  background: var(--warning-bg) !important;
+}
+
+.product-card {
+  background: var(--surface) !important;
+}
+
+.product-card:hover {
+  border-color: var(--brand) !important;
+}
+
+.admin-product-row,
+.admin-floor-row,
+.admin-user-row,
+.booking-row {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.admin-product-row:hover,
+.admin-user-row:hover {
+  border-color: var(--brand-light) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+.pos-error {
+  background: var(--danger-bg) !important;
+  color: var(--danger) !important;
+  border: 1px solid #FFCDD2;
+  border-radius: var(--radius-md) !important;
+}
+
+.pos-success {
+  background: var(--success-bg) !important;
+  color: var(--success) !important;
+  border: 1px solid #C8E6C9;
+  border-radius: var(--radius-md) !important;
+}
+
+/* Cashier floor quick strip */
+.cashier-quick-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.cashier-quick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 1rem 1.15rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--text);
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.cashier-quick-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.cashier-quick-card strong {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.cashier-quick-card span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cashier-quick-card em {
+  font-style: normal;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}

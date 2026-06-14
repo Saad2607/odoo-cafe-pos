@@ -453,11 +453,8 @@ export default function OrderPage() {
 
 
         <header className="cafe-order-header">
-
-          <h2>BRIVIO</h2>
-
-          <p>FROM 8:00 TO 11.30AM</p>
-
+          <h2>Place Order</h2>
+          <p>{products.length} items · combos & smart pairings</p>
         </header>
 
 

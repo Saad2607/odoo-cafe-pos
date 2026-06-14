@@ -86,6 +86,11 @@ export default function BookingsPage() {
   return (
     <AppLayout title="Bookings" subtitle="Table reservations">
       <div className="pos-page admin-page">
+        <section className="page-hero">
+          <h2>Table Bookings</h2>
+          <p>View and manage reservations by date</p>
+        </section>
+
         <div className="bookings-toolbar">
           <label>
             Date

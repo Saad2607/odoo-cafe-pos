@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
-import { cancelOrder, fetchSessionOrders, Order } from '../lib/api';
+import { cancelOrder, fetchSessionOrders, getStoredUser, Order } from '../lib/api';
+import { appConfirm } from '../context/DialogContext';
 import '../styles/orders.css';
 
 const STATUS_LABELS: Record<Order['status'], string> = {
@@ -11,6 +12,8 @@ const STATUS_LABELS: Record<Order['status'], string> = {
 };
 
 export default function OrdersPage() {
+  const user = getStoredUser();
+  const isAdmin = user?.role === 'ADMIN';
   const [orders, setOrders] = useState<Order[]>([]);
   const [search, setSearch] = useState('');
   const [filterDate, setFilterDate] = useState('');
@@ -39,7 +42,12 @@ export default function OrdersPage() {
   }
 
   async function handleCancel(orderId: string) {
-    if (!confirm('Cancel this draft order?')) return;
+    const ok = await appConfirm('Cancel this draft order?', {
+      title: 'Cancel order',
+      confirmLabel: 'Cancel Order',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await cancelOrder(orderId);
       setMessage('Order cancelled');
@@ -50,8 +58,17 @@ export default function OrdersPage() {
   }
 
   return (
-    <AppLayout title="Orders" subtitle="Current session">
+    <AppLayout title="Orders" subtitle={isAdmin ? 'All active POS sessions' : 'Current session'}>
       <div className="orders-page">
+        <section className="page-hero">
+          <h2>{isAdmin ? 'All Session Orders' : 'Session Orders'}</h2>
+          <p>
+            {isAdmin
+              ? 'Orders from every open cashier session — search and manage across the floor'
+              : 'Search, filter, and manage orders for your active POS session'}
+          </p>
+        </section>
+
         <form className="orders-search" onSubmit={handleSearch}>
           <input
             className="pill-input"
@@ -73,7 +90,11 @@ export default function OrdersPage() {
         {message && <div className="pos-success">{message}</div>}
 
         {!loading && orders.length === 0 && (
-          <p className="pos-muted">No orders in this session yet.</p>
+          <p className="pos-muted">
+            {isAdmin
+              ? 'No orders in any open session yet. Cashier orders appear here while their session is active.'
+              : 'No orders in this session yet.'}
+          </p>
         )}
 
         <div className="orders-list">

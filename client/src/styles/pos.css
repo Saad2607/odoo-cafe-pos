@@ -6,7 +6,7 @@
 }
 
 .pos-muted {
-  color: #8a8494;
+  color: #7A7268;
 }
 
 .pos-error {
@@ -26,7 +26,7 @@
 }
 
 .pos-link {
-  color: #6B4E71;
+  color: #9E4B3A;
   font-weight: 600;
   text-decoration: none;
 }
@@ -40,7 +40,7 @@
 }
 
 .floor-section h2 {
-  color: #3D405B;
+  color: #2C2C2C;
   margin-bottom: 1rem;
 }
 
@@ -52,7 +52,7 @@
 
 .table-card {
   background: white;
-  border: 2px solid #e8e0d8;
+  border: 2px solid #E8DFD4;
   border-radius: 20px;
   padding: 1.25rem;
   text-align: center;
@@ -79,13 +79,13 @@
   display: block;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #3D405B;
+  color: #2C2C2C;
 }
 
 .table-seats {
   display: block;
   font-size: 0.85rem;
-  color: #8a8494;
+  color: #7A7268;
   margin: 0.25rem 0 0.75rem;
 }
 
@@ -131,8 +131,8 @@
 }
 
 .menu-category h3 {
-  color: #3D405B;
-  border-left: 4px solid #6B4E71;
+  color: #2C2C2C;
+  border-left: 4px solid #9E4B3A;
   padding-left: 0.75rem;
   margin-bottom: 0.75rem;
 }
@@ -144,10 +144,10 @@
 }
 
 .product-card {
-  border: 1px solid #e8e0d8;
+  border: 1px solid #E8DFD4;
   border-radius: 16px;
   padding: 1rem;
-  background: #faf8f5;
+  background: #FDFBF7;
   text-align: left;
   cursor: pointer;
   font-family: inherit;
@@ -155,7 +155,7 @@
 }
 
 .product-card:hover:not(:disabled) {
-  border-color: #6B4E71;
+  border-color: #9E4B3A;
 }
 
 .product-card:disabled {
@@ -166,24 +166,24 @@
 .product-name {
   display: block;
   font-weight: 600;
-  color: #3D405B;
+  color: #2C2C2C;
 }
 
 .product-price {
   display: block;
   margin-top: 0.35rem;
-  color: #6B4E71;
+  color: #9E4B3A;
   font-weight: 700;
 }
 
 .product-tax {
   display: block;
   font-size: 0.75rem;
-  color: #8a8494;
+  color: #7A7268;
 }
 
 .cart-panel h3 {
-  color: #3D405B;
+  color: #2C2C2C;
   margin-bottom: 0.75rem;
 }
 
@@ -212,7 +212,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid #e8e0d8;
+  border: 1px solid #E8DFD4;
   background: white;
   cursor: pointer;
   font-family: inherit;
@@ -223,7 +223,7 @@
   justify-content: space-between;
   padding-top: 0.75rem;
   font-size: 1.05rem;
-  color: #3D405B;
+  color: #2C2C2C;
 }
 
 .cart-submit {
@@ -239,7 +239,7 @@
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
   background: #ede7f6;
-  color: #6B4E71;
+  color: #9E4B3A;
   font-size: 0.8rem;
   font-weight: 600;
   flex-shrink: 0;
@@ -260,7 +260,7 @@
   background: white;
   border-radius: 16px;
   padding: 1.25rem;
-  border: 2px solid #e8e0d8;
+  border: 2px solid #E8DFD4;
   box-shadow: 0 4px 16px rgba(61, 64, 91, 0.05);
 }
 
@@ -273,13 +273,13 @@
 }
 
 .kitchen-card h3 {
-  color: #3D405B;
+  color: #2C2C2C;
   font-size: 1rem;
   margin: 0;
 }
 
 .kitchen-meta {
-  color: #8a8494;
+  color: #7A7268;
   font-size: 0.85rem;
   margin: 0 0 0.75rem;
 }
@@ -308,7 +308,7 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.45rem 0;
-  color: #3D405B;
+  color: #2C2C2C;
 }
 
 .kitchen-item-photo {
@@ -336,7 +336,7 @@
 .kitchen-empty {
   text-align: center;
   padding: 3rem;
-  color: #8a8494;
+  color: #7A7268;
   background: white;
   border-radius: 20px;
 }
@@ -361,7 +361,7 @@
   flex: 1;
   padding: 0.6rem 1rem;
   border-radius: 999px;
-  border: 1px solid #e8e0d8;
+  border: 1px solid #E8DFD4;
   font-family: inherit;
 }
 
@@ -382,7 +382,7 @@
 
 .admin-form h3,
 .admin-list h3 {
-  color: #3D405B;
+  color: #2C2C2C;
   margin-bottom: 1rem;
 }
 
@@ -391,7 +391,7 @@
   margin-bottom: 0.75rem;
   padding: 0.65rem 1rem;
   border-radius: 999px;
-  border: 1px solid #e8e0d8;
+  border: 1px solid #E8DFD4;
   font-family: inherit;
 }
 
@@ -430,7 +430,7 @@
 .admin-row-actions button {
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  border: 1px solid #e8e0d8;
+  border: 1px solid #E8DFD4;
   background: white;
   font-family: inherit;
   font-size: 0.8rem;
@@ -438,8 +438,8 @@
 }
 
 .admin-row-actions button:hover {
-  border-color: #6B4E71;
-  color: #6B4E71;
+  border-color: #9E4B3A;
+  color: #9E4B3A;
 }
 
 @media (max-width: 900px) {
@@ -554,7 +554,7 @@
 .discount-tab {
   padding: 0.5rem 1.25rem;
   border-radius: 999px;
-  border: 1px solid #e8e0d8;
+  border: 1px solid #E8DFD4;
   background: white;
   font-family: inherit;
   font-weight: 600;
@@ -692,7 +692,7 @@
 
 .kitchen-live-sub {
   font-size: 0.8rem;
-  color: #8a8494;
+  color: #7A7268;
 }
 
 .order-summary {
@@ -722,7 +722,7 @@
 .cart-unit-price {
   display: block;
   font-size: 0.75rem;
-  color: #8a8494;
+  color: #7A7268;
 }
 
 .cart-line-total {

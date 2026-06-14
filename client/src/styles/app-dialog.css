@@ -1,0 +1,98 @@
+.app-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 20, 16, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;
+  padding: 1.25rem;
+  animation: app-dialog-fade 0.2s ease;
+}
+
+@keyframes app-dialog-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.app-dialog {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 1.75rem 1.75rem 1.5rem;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  animation: app-dialog-rise 0.25s ease;
+}
+
+@keyframes app-dialog-rise {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.app-dialog-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  margin-bottom: 1rem;
+}
+
+.app-dialog-icon--default {
+  background: rgba(158, 75, 58, 0.12);
+}
+
+.app-dialog-icon--warning {
+  background: var(--warning-bg);
+}
+
+.app-dialog-icon--danger {
+  background: var(--danger-bg);
+}
+
+.app-dialog-icon--error {
+  background: var(--danger-bg);
+}
+
+.app-dialog h2 {
+  margin: 0 0 0.65rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.app-dialog-message {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-line;
+}
+
+.app-dialog-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.app-dialog-actions .terminal-btn {
+  min-width: 100px;
+}
+
+.app-dialog-btn-danger {
+  background: var(--danger) !important;
+  color: var(--text-inverse) !important;
+  border: none !important;
+}
+
+.app-dialog-btn-danger:hover:not(:disabled) {
+  filter: brightness(1.08);
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AppLayout from '../components/AppLayout';
 import { createCustomer, deleteCustomer, fetchCustomers, updateCustomer, Customer } from '../lib/api';
+import { appConfirm } from '../context/DialogContext';
 import '../styles/customers.css';
 
 export default function CustomersPage() {
@@ -59,7 +60,12 @@ export default function CustomersPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this customer?')) return;
+    const ok = await appConfirm('Delete this customer? This cannot be undone.', {
+      title: 'Delete customer',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await deleteCustomer(id);
       setMessage('Customer deleted');
@@ -72,6 +78,11 @@ export default function CustomersPage() {
   return (
     <AppLayout title="Customers" subtitle="Search & manage">
       <div className="customers-page">
+        <section className="page-hero">
+          <h2>Customers</h2>
+          <p>Search, add, and manage customer profiles for receipts and loyalty</p>
+        </section>
+
         <div className="customers-toolbar">
           <form className="customers-search" onSubmit={handleSearch}>
             <input
@@ -97,12 +108,14 @@ export default function CustomersPage() {
               <h4>{c.name}</h4>
               {c.email && <p>{c.email}</p>}
               {c.phone && <p>{c.phone}</p>}
-              <button type="button" className="terminal-btn cafe-btn-outline" onClick={() => openEdit(c)}>
-                Edit
-              </button>
-              <button type="button" className="terminal-btn cafe-btn-danger" onClick={() => handleDelete(c.id)}>
-                Delete
-              </button>
+              <div className="customer-card-actions">
+                <button type="button" className="terminal-btn cafe-btn-outline" onClick={() => openEdit(c)}>
+                  Edit
+                </button>
+                <button type="button" className="terminal-btn cafe-btn-danger" onClick={() => handleDelete(c.id)}>
+                  Delete
+                </button>
+              </div>
             </article>
           ))}
         </div>

@@ -10,7 +10,56 @@ import {
   Category,
   PaymentSettings,
 } from '../lib/api';
+import { appConfirm } from '../context/DialogContext';
 import '../styles/admin-settings.css';
+
+const CATEGORY_COLOR_PRESETS = [
+  '#9E4B3A', '#C4785A', '#D4A574', '#2E7D32', '#1565C0',
+  '#6A1B9A', '#E65100', '#5D4037', '#455A64', '#C62828',
+];
+
+function CategoryColorPicker({
+  value,
+  onChange,
+  id,
+  compact = false,
+}: {
+  value: string;
+  onChange: (color: string) => void;
+  id: string;
+  compact?: boolean;
+}) {
+  return (
+    <div className={`category-color-picker${compact ? ' category-color-picker--compact' : ''}`}>
+      <label className="category-color-swatch-btn" htmlFor={id} title="Pick a color">
+        <span className="category-color-swatch-ring" style={{ background: value }} aria-hidden />
+        <input
+          id={id}
+          type="color"
+          className="category-color-input"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </label>
+      <span className="category-color-hex">{value.toUpperCase()}</span>
+      {!compact && (
+        <div className="category-color-presets" role="group" aria-label="Preset colors">
+          {CATEGORY_COLOR_PRESETS.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              className={`category-color-preset${value.toLowerCase() === preset.toLowerCase() ? ' active' : ''}`}
+              style={{ background: preset }}
+              onClick={() => onChange(preset)}
+              title={preset}
+              aria-label={`Use color ${preset}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminSettingsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -54,7 +103,12 @@ export default function AdminSettingsPage() {
   }
 
   async function handleDeleteCategory(id: string) {
-    if (!confirm('Delete this category?')) return;
+    const ok = await appConfirm('Delete this category?', {
+      title: 'Delete category',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await deleteCategory(id);
       setCategories((prev) => prev.filter((c) => c.id !== id));
@@ -88,6 +142,11 @@ export default function AdminSettingsPage() {
   return (
     <AppLayout title="Admin Settings" subtitle="Categories & payments">
       <div className="admin-settings-page">
+        <section className="page-hero">
+          <h2>Admin Settings</h2>
+          <p>Configure categories, payment methods, and cafe preferences</p>
+        </section>
+
         {error && <div className="pos-error">{error}</div>}
         {message && <div className="pos-success">{message}</div>}
 
@@ -115,7 +174,11 @@ export default function AdminSettingsPage() {
           <h3>Categories</h3>
           <form className="category-form" onSubmit={handleAddCategory}>
             <input className="pill-input" placeholder="Category name" required value={catForm.name} onChange={(e) => setCatForm({ ...catForm, name: e.target.value })} />
-            <input type="color" value={catForm.color} onChange={(e) => setCatForm({ ...catForm, color: e.target.value })} />
+            <CategoryColorPicker
+              id="category-color-new"
+              value={catForm.color}
+              onChange={(color) => setCatForm({ ...catForm, color })}
+            />
             <button type="submit" className="terminal-btn cafe-btn-primary">Add</button>
           </form>
           <ul className="category-list">
@@ -126,8 +189,12 @@ export default function AdminSettingsPage() {
                   <div className="category-list-edit-row">
                     <input className="pill-input" value={editingCat.name}
                       onChange={(e) => setEditingCat({ ...editingCat, name: e.target.value })} />
-                    <input type="color" value={editingCat.color}
-                      onChange={(e) => setEditingCat({ ...editingCat, color: e.target.value })} />
+                    <CategoryColorPicker
+                      id={`category-color-edit-${c.id}`}
+                      value={editingCat.color}
+                      onChange={(color) => setEditingCat({ ...editingCat, color })}
+                      compact
+                    />
                     <div className="category-list-actions">
                       <button type="button" className="terminal-btn cafe-btn-primary" onClick={handleSaveCategoryEdit}>Save</button>
                       <button type="button" className="terminal-btn cafe-btn-outline" onClick={() => setEditingCat(null)}>Cancel</button>

@@ -36,7 +36,7 @@ export default function TerminalLayout({ children, title, subtitle }: TerminalLa
     <div className="terminal-page">
       <header className="terminal-header">
         <div className="terminal-brand">
-          <div className="terminal-brand-icon"><img src="/cafe.svg" alt="" width={28} height={28} /></div>
+          <div className="terminal-brand-icon"><img src="/cafe.svg" alt="" width={38} height={38} /></div>
           <div>
             <h1>{title || 'POS Terminal'}</h1>
             <span>{subtitle || 'Odoo Cafe — Phase 3'}</span>

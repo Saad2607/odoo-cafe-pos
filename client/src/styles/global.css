@@ -1,9 +1,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  color: #2C2C2C;
-  background: #F5F0E8;
+
+html {
+  scroll-behavior: smooth;
 }
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
 #root { min-height: 100vh; }
+
 a { color: inherit; }
-button, input { font-family: inherit; }
+
+button, input, select, textarea { font-family: inherit; }
+
+::selection {
+  background: rgba(158, 75, 58, 0.2);
+  color: var(--text);
+}

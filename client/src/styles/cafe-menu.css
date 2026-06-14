@@ -11,37 +11,51 @@
   100% { box-shadow: 0 0 0 0 rgba(158, 75, 58, 0); }
 }
 
-.cafe-order-page { background: #F5F0E8; }
+.cafe-order-page { background: var(--bg); }
 
-.cafe-order-header { text-align: center; margin-bottom: 2rem; }
+.cafe-order-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+  padding: 1.5rem 1.75rem;
+  background: var(--brand-gradient);
+  border-radius: var(--radius-lg);
+  color: var(--text-inverse);
+  box-shadow: var(--brand-shadow);
+}
 
 .cafe-order-header h2 {
-  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 800;
-  color: #9E4B3A;
-  letter-spacing: 0.14em;
+  color: var(--text-inverse);
+  letter-spacing: 0.1em;
+  margin: 0 0 0.35rem;
 }
 
 .cafe-order-header p {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #2C2C2C;
-  letter-spacing: 0.1em;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(253, 251, 247, 0.9);
+  letter-spacing: 0.08em;
+  margin: 0;
 }
 
 .cafe-back-link {
   display: inline-block;
   margin-bottom: 1rem;
-  color: #9E4B3A;
+  color: var(--brand);
   font-weight: 600;
   font-size: 0.85rem;
   text-decoration: none;
 }
 
+.cafe-back-link:hover {
+  color: var(--brand-dark);
+}
+
 .cafe-menu-panel {
-  background: #FDFBF7 !important;
-  border: 1px solid #E8DFD4 !important;
-  box-shadow: none !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 
 .cafe-category { animation: menu-fade-up 0.5s ease backwards; margin-bottom: 2.5rem !important; }

@@ -58,6 +58,13 @@ router.get('/', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res
     const revenue = orders.reduce((s, o) => s + o.amount, 0);
     const avgOrder = totalOrders > 0 ? revenue / totalOrders : 0;
 
+    const allOrdersFilter: Record<string, unknown> = { status: { $ne: 'CANCELLED' } };
+    if (filter.date) allOrdersFilter.date = filter.date;
+    if (employeeId) allOrdersFilter.employeeId = employeeId;
+    if (sessionId) allOrdersFilter.sessionId = sessionId;
+    if (productId) allOrdersFilter['items.productId'] = productId;
+    const allOrderCount = await Order.countDocuments(allOrdersFilter);
+
     const dayMap = new Map<string, { revenue: number; count: number }>();
     for (const o of orders) {
       const key = new Date(o.date).toISOString().slice(0, 10);
@@ -116,6 +123,7 @@ router.get('/', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res
     return res.json({
       metrics: {
         totalOrders,
+        allOrderCount,
         revenue: Math.round(revenue),
         avgOrderValue: Math.round(avgOrder),
       },

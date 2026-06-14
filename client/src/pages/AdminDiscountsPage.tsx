@@ -127,6 +127,11 @@ export default function AdminDiscountsPage() {
   return (
     <AppLayout title="Discounts" subtitle="Coupons & promotions">
       <div className="pos-page admin-page">
+        <section className="page-hero">
+          <h2>Discounts & Coupons</h2>
+          <p>Create promo codes and percentage or fixed discounts</p>
+        </section>
+
         {loading && <p className="pos-muted">Loading…</p>}
         {error && <div className="pos-error">{error}</div>}
         {message && <div className="pos-success">{message}</div>}

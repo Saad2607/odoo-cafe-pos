@@ -44,9 +44,25 @@ export default function DashboardPage() {
       .catch(() => undefined);
   }, []);
 
-  const avgOrder = stats.paidOrderCount > 0
-    ? Math.round(stats.totalSales / stats.paidOrderCount)
-    : 0;
+  const isAdmin = user?.role === 'ADMIN';
+
+  const cardMetrics = isAdmin && reports
+    ? {
+        orderCount: reports.metrics.allOrderCount,
+        totalSales: reports.metrics.revenue,
+        paidOrderCount: reports.metrics.totalOrders,
+        avgOrder: reports.metrics.avgOrderValue,
+      }
+    : {
+        orderCount: stats.orderCount,
+        totalSales: stats.totalSales,
+        paidOrderCount: stats.paidOrderCount,
+        avgOrder: stats.paidOrderCount > 0
+          ? Math.round(stats.totalSales / stats.paidOrderCount)
+          : 0,
+      };
+
+  const avgOrder = cardMetrics.avgOrder;
 
   const maxRevenue = Math.max(...(reports?.salesTrend.map((d) => d.revenue) ?? [1]), 1);
 
@@ -56,8 +72,18 @@ export default function DashboardPage() {
   }
 
   return (
-    <AppLayout title="Dashboard" subtitle="Brivio Cafe · Reports & Session">
+    <AppLayout title="Dashboard" subtitle="Brivio Cafe · Food & Services">
       <div className="dashboard-page">
+        <section className="page-hero dash-welcome-hero">
+          <h2>Hello, {user?.name?.split(' ')[0] ?? 'Admin'}</h2>
+          <p>
+            {isAdmin ? 'Today' : `Session ${stats.sessionNumber || '—'}`}
+            {' · '}Revenue ₹{cardMetrics.totalSales.toFixed(0)}
+            {' · '}{cardMetrics.orderCount} orders
+            {isAdmin ? ' (all cashiers)' : ''}
+          </p>
+        </section>
+
         <PosSessionCard
           sessionNumber={stats.sessionNumber}
           openedAt={stats.openedAt}
@@ -78,39 +104,40 @@ export default function DashboardPage() {
               <span><strong>{catalog.vegItems}</strong>Veg</span>
               <span><strong>{catalog.newItems}</strong>New</span>
             </div>
-            <Link to="/menu-explorer" className="terminal-btn cafe-btn-outline" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.6)' }}>
+            <Link to="/menu-explorer" className="terminal-btn cafe-btn-outline dash-catalog-link">
               Open Menu Explorer →
             </Link>
           </section>
         )}
 
         <section className="dash-metrics">
+          {isAdmin && <p className="dash-metrics-note pos-muted">Today&apos;s totals across all cashier sessions (paid orders count toward revenue)</p>}
           <article className="dash-metric">
             <span className="dash-metric-icon">📋</span>
             <div>
-              <strong>{stats.orderCount}</strong>
-              <span>Total Orders</span>
+              <strong>{cardMetrics.orderCount}</strong>
+              <span>Total Orders{isAdmin ? ' Today' : ''}</span>
             </div>
           </article>
           <article className="dash-metric dash-metric-main">
             <span className="dash-metric-icon">₹</span>
             <div>
-              <strong>{stats.totalSales.toFixed(0)}</strong>
-              <span>Revenue</span>
+              <strong>{cardMetrics.totalSales.toFixed(0)}</strong>
+              <span>Revenue{isAdmin ? ' Today' : ''}</span>
             </div>
           </article>
           <article className="dash-metric">
             <span className="dash-metric-icon">✓</span>
             <div>
-              <strong>{stats.paidOrderCount}</strong>
-              <span>Paid Orders</span>
+              <strong>{cardMetrics.paidOrderCount}</strong>
+              <span>Paid Orders{isAdmin ? ' Today' : ''}</span>
             </div>
           </article>
           <article className="dash-metric">
             <span className="dash-metric-icon">◎</span>
             <div>
-              <strong>{avgOrder > 0 ? `₹${avgOrder}` : '—'}</strong>
-              <span>Avg. Order Value</span>
+              <strong>{avgOrder > 0 ? `₹${Math.round(avgOrder)}` : '—'}</strong>
+              <span>Avg. Order Value{isAdmin ? ' Today' : ''}</span>
             </div>
           </article>
         </section>
@@ -176,8 +203,23 @@ export default function DashboardPage() {
 
         {user?.role === 'ADMIN' && (
           <section className="dash-actions-section">
-            <h2>Backend</h2>
+            <h2>Admin Tools</h2>
             <div className="dash-action-grid">
+              <Link to="/floor" className="dash-action-card">
+                <span className="dash-action-icon">🪑</span>
+                <div><h3>Open POS</h3><p>Floor & table orders</p></div>
+                <span className="dash-action-arrow">→</span>
+              </Link>
+              <Link to="/menu-explorer" className="dash-action-card">
+                <span className="dash-action-icon">📖</span>
+                <div><h3>Menu Explorer</h3><p>500+ item catalog</p></div>
+                <span className="dash-action-arrow">→</span>
+              </Link>
+              <Link to="/live-ops" className="dash-action-card dash-action-live">
+                <span className="dash-action-icon">📡</span>
+                <div><h3>Live Ops</h3><p>Real-time floor view</p></div>
+                <span className="dash-action-arrow">→</span>
+              </Link>
               <Link to="/admin/products" className="dash-action-card">
                 <span className="dash-action-icon">📦</span>
                 <div><h3>Products</h3><p>Menu management</p></div>
